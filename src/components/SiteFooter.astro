@@ -1,0 +1,173 @@
+---
+/* CONTACT + FOOTER — one door, audience-agnostic.
+   No segmented paths, no competing calls to action. */
+
+/* Email is the action; GitHub is verification. Two links at identical
+   weight made the reader choose, so email leads and GitHub sits beneath it
+   as secondary. */
+
+const email = 'mahmoidmohsen123456789@gmail.com'
+
+/* An entry only renders once it has a real `href`; a null href is skipped
+   rather than shipped as a dead `#` link, which would fail a reader at the
+   exact moment they try to verify.
+
+   GitHub carries the whole verification load on its own — it is the only
+   channel here a reader can use to check the claims elsewhere on the site
+   without taking anything on trust. Verified HTTP 200 before wiring.
+
+   No LinkedIn profile exists, so no LinkedIn entry is declared at all. It is
+   absent rather than null-and-hidden: a hidden placeholder invites someone
+   later to fill it with a guess. */
+const secondary: { label: string; href: string | null }[] = [
+  { label: 'GitHub', href: 'https://github.com/mahmouddevmohsen' },
+]
+const visibleSecondary = secondary.filter(
+  (l): l is { label: string; href: string } => Boolean(l.href)
+)
+
+const year = 2026
+---
+
+<footer id="contact" class="section foot">
+  <div class="shell section__inner">
+    <div class="foot__grid">
+      <p class="foot__statement section-title" data-reveal>
+        If your team spends too much time doing something manually,
+        <span class="dim">I&rsquo;d be happy to discuss whether it&rsquo;s worth automating.</span>
+      </p>
+
+      <div class="foot__actions" data-reveal>
+        <a class="foot__primary on-invert" href={`mailto:${email}`}>
+          <span>{email}</span>
+          <span class="foot__arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <ul class="foot__links">
+          {
+            visibleSecondary.map((l) => (
+              <li class="foot__link-row">
+                <a class="foot__link" href={l.href}>
+                  <span>{l.label}</span>
+                  <span class="foot__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot__base">
+      <span class="meta">&copy; {year} Mahmoud Mohsen</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    gap: var(--s-8);
+    align-items: start;
+  }
+
+  .foot__statement {
+    max-inline-size: 24ch;
+  }
+
+  .foot__actions {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .foot__primary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding: var(--s-4) var(--s-5);
+    border: 1px solid var(--rule-ink);
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+    font-size: var(--t-lead);
+    font-weight: var(--fw-medium);
+    transition: background-color var(--dur-1) var(--ease);
+  }
+
+  .foot__primary:hover,
+  .foot__primary:focus-visible {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .foot__primary .foot__arrow {
+    color: currentColor;
+  }
+
+  /* The address is a single unbreakable token wider than the 20rem column.
+     Without these two rules it overflows the flex line and pushes the arrow
+     past the viewport, producing a 16px horizontal scrollbar on EVERY page.
+     `min-inline-size: 0` lets the flex item shrink below its content size;
+     `anywhere` lets the address itself break. The arrow must not shrink. */
+  .foot__primary > span:first-child,
+  .foot__link > span:first-child {
+    min-inline-size: 0;
+    /* `break-word` first as a universally-supported fallback: `anywhere` is
+       Safari 15.4+, and if it is dropped the address overflows again. This
+       rule prevents a layout bug, so it must not depend on a recent feature. */
+    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .foot__arrow {
+    flex: none;
+  }
+
+  .foot__links {
+    margin-block-start: var(--s-5);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .foot__link-row {
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .foot__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--s-4);
+    font-size: var(--t-lead);
+    transition: color var(--dur-1) var(--ease), padding-inline var(--dur-2) var(--ease);
+  }
+
+  .foot__link:hover,
+  .foot__link:focus-visible {
+    color: var(--accent);
+    padding-inline-start: var(--s-3);
+  }
+
+  .foot__arrow {
+    color: var(--ink-3);
+  }
+
+  .foot__base {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-block-start: var(--pace-tight);
+    padding-block-start: var(--s-4);
+    border-block-start: 1px solid var(--rule);
+  }
+
+  @media (max-width: 56rem) {
+    .foot__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-6);
+    }
+    .foot__statement {
+      max-inline-size: none;
+    }
+  }
+</style>

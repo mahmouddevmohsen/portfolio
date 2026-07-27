@@ -1,0 +1,83 @@
+<svg
+  class="dg"
+  viewBox="0 -14 1180 414"
+  role="img"
+  aria-labelledby="dg-bae-title dg-bae-desc"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id="dg-bae-title">Business Automation Engine — orchestration architecture</title>
+  <desc id="dg-bae-desc">
+    Workflow orchestration drives a deterministic automation pipeline. AI agent
+    coordination attaches to the pipeline as a called component handling
+    reasoning tasks only, never the control flow. The pipeline reaches business
+    systems through integrations and produces operational outputs. The whole is
+    modular and reusable across clients.
+  </desc>
+
+  <!-- outer system frame = callout 06 -->
+  <g class="dg-zone">
+    <rect x="8" y="16" width="1164" height="356" />
+    <text class="dg-zone-label" x="20" y="6">06 · System architecture — modular, reusable across businesses</text>
+  </g>
+
+  <!-- connectors -->
+  <g class="dg-line">
+    <path d="M256 106 V146" marker-end="url(#dg-arrow3)" />
+    <path d="M456 181 H536" marker-end="url(#dg-arrow3)" />
+    <path d="M736 181 H816" marker-end="url(#dg-arrow3)" />
+    <!-- AI agents called from the pipeline and returning -->
+    <path d="M356 216 V276" class="dg-line--dashed" marker-end="url(#dg-arrow3)" />
+    <path d="M256 276 V216" class="dg-line--dashed" marker-end="url(#dg-arrow3)" />
+  </g>
+
+  <!-- nodes -->
+  <g class="dg-node">
+    <rect x="156" y="46" width="200" height="60" />
+    <text class="dg-idx" x="168" y="70">01</text>
+    <text class="dg-label" x="168" y="92">Workflow orchestration</text>
+  </g>
+
+  <g class="dg-node dg-node--spine">
+    <rect x="156" y="146" width="300" height="70" />
+    <text class="dg-idx" x="168" y="170">04</text>
+    <text class="dg-label" x="168" y="192">Automation pipeline</text>
+    <text class="dg-sub" x="168" y="208">deterministic control flow</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="156" y="276" width="200" height="70" />
+    <text class="dg-idx" x="168" y="300">02</text>
+    <text class="dg-label" x="168" y="322">AI agent coordination</text>
+    <text class="dg-sub" x="168" y="338">reasoning tasks only</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="536" y="146" width="200" height="70" />
+    <text class="dg-idx" x="548" y="170">03</text>
+    <text class="dg-label" x="548" y="192">Business integrations</text>
+    <text class="dg-sub" x="548" y="208">WhatsApp · Telegram · Gmail</text>
+  </g>
+
+  <g class="dg-node dg-node--out">
+    <rect x="816" y="146" width="200" height="70" />
+    <text class="dg-idx" x="828" y="170">05</text>
+    <text class="dg-label" x="828" y="192">Operational outputs</text>
+  </g>
+
+  <text class="dg-note" x="376" y="316">AI is called by the pipeline —</text>
+  <text class="dg-note" x="376" y="332">workflows remain deterministic</text>
+
+  <defs>
+    <marker
+      id="dg-arrow3"
+      viewBox="0 0 8 8"
+      refX="7"
+      refY="4"
+      markerWidth="8"
+      markerHeight="8"
+      orient="auto-start-reverse"
+    >
+      <path class="dg-arrowhead" d="M0 1 L7 4 L0 7 Z" />
+    </marker>
+  </defs>
+</svg>

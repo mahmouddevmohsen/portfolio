@@ -1,0 +1,622 @@
+---
+import { getCollection } from 'astro:content'
+import type { CollectionEntry } from 'astro:content'
+import type { GetStaticPaths } from 'astro'
+import Base from '../../layouts/Base.astro'
+import Chip from '../../components/Chip.astro'
+import SectionHead from '../../components/SectionHead.astro'
+import { Image } from 'astro:assets'
+
+/* PROJECT PAGE — renders the full Authoring Record when one exists.
+
+   Structure follows the locked Case Study Template: a scannable header, the
+   four narrative beats carrying muted labels IN THE MARGIN (not as headings
+   in the text flow, so scanning and reading are both served), then the
+   decision spread as the signature object, then evidence, then a demoted
+   technical line.
+
+   Two rules encoded here:
+
+   1. `study.problem` is byte-identical to the preview `problem` on every
+      project, so it is rendered ONCE — as the problem beat. The preview
+      field still carries the homepage card.
+
+   2. Authoring-only fields (disclosure, assetsRequired, claimLedger,
+      openQuestions) are NEVER rendered. They exist so the record and the
+      page cannot drift apart, not to be published. */
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const projects = (await getCollection('projects')).sort(
+    (a, b) => a.data.order - b.data.order
+  )
+
+  return projects.map((project, i) => {
+    const next = projects[(i + 1) % projects.length]
+    return {
+      params: { slug: project.id },
+      props: {
+        p: project.data,
+        slug: project.id,
+        index: i + 1,
+        next: { slug: next.id, name: next.data.name },
+      },
+    }
+  })
+}
+
+/* Props are typed from the collection schema rather than left to inference.
+   A page with `getStaticPaths` receives `Astro.props` as `unknown` otherwise,
+   which silently disables type-checking across the whole template — the
+   entire study object would go unchecked. */
+interface Props {
+  p: CollectionEntry<'projects'>['data']
+  slug: string
+  index: number
+  next: { slug: string; name: string }
+}
+
+const { p, slug, index, next } = Astro.props as Props
+const num = String(index).padStart(2, '0')
+const study = p.study
+
+/* Evidence diagrams are INLINED, not <img>-linked, for three reasons: an
+   SVG loaded through <img> is an isolated document and cannot reach the
+   page's self-hosted typeface or design tokens, so it would render in a
+   fallback face and hardcoded colours; inlining costs no extra request; and
+   the diagram inherits `currentColor` and the palette automatically.
+
+   Matched by project slug rather than a path in the content file, so adding
+   or removing a diagram never touches project data. `evidence.src` stays
+   free for the owner's raster screenshots. */
+const diagrams = import.meta.glob<string>('../../assets/evidence/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
+const diagram = diagrams[`../../assets/evidence/${slug}.svg`]
+
+/* Authentic screenshots, matched by slug the same way. Files are named
+   `<slug>-<n>.jpg`, so a project can carry several and adding one never
+   touches project data.
+
+   Every one of these is a capture of a real running system. Nothing here is
+   a mockup: where no genuine screenshot exists the project shows its
+   architecture diagram alone rather than a fabricated interface. */
+const shotFiles = import.meta.glob<ImageMetadata>(
+  '../../assets/evidence/shots/*.jpg',
+  { import: 'default', eager: true }
+)
+
+/* Captions describe what the artifact IS. They make no claim about outcomes,
+   scale or results — those would be claims the evidence cannot carry. */
+const SHOT_CAPTIONS: Record<string, string> = {
+  'commerce-hub-1':
+    'Operations dashboard — the administrative home, with product, category, order, customer, analytics, monitoring, user and backup modules in the sidebar. Account and store identifiers are redacted.',
+  'commerce-hub-2':
+    'Monitoring interface — health check, Web Vitals collection and error tracking, with Core Web Vitals reported at p75. Account and store identifiers are redacted.',
+  'jarvis-os-1':
+    'Runtime log at startup: the action registry reports 18 registered actions, then names the five mutations that cannot self-verify and why. Local paths and addresses are redacted.',
+}
+
+const shots = Object.entries(shotFiles)
+  .map(([path, img]) => {
+    const key = path.split('/').pop()!.replace('.jpg', '')
+    return { key, img, caption: SHOT_CAPTIONS[key] ?? '' }
+  })
+  .filter((s) => s.key.startsWith(`${slug}-`))
+  .sort((a, b) => a.key.localeCompare(b.key))
+
+/* The scan layer. Only rows with a value are emitted — `statusDetail` is
+   optional and deliberately absent until the owner confirms exact months. */
+const facts: { term: string; value: string }[] = study
+  ? [
+      { term: 'Sector', value: study.sector },
+      { term: 'Size', value: study.size },
+      { term: 'My role', value: study.role },
+      { term: 'Period', value: study.period },
+      ...(study.statusDetail
+        ? [{ term: 'Status detail', value: study.statusDetail }]
+        : []),
+    ]
+  : []
+---
+
+<Base
+  title={`${p.name} — Mahmoud Mohsen`}
+  description={study?.oneLine ?? p.solution}
+  type="article"
+>
+  <article class="section section--tight">
+    <div class="shell section__inner">
+      <p class="crumb meta"><a href="/#work">Selected work</a> <span aria-hidden="true">/</span> {num}</p>
+
+      <header class="lede">
+        <h1 class="lede__name section-title" data-reveal>{p.name}</h1>
+        {study && <p class="lede__one lead measure" data-reveal style="--reveal-delay:80ms">{study.oneLine}</p>}
+        <div class="lede__meta" data-reveal style="--reveal-delay:160ms">
+          <Chip label={p.status} variant="status" />
+          <ul class="lede__stack">
+            {p.stack.map((s: string) => <li><Chip label={s} /></li>)}
+          </ul>
+        </div>
+      </header>
+
+      {
+        study && (
+          <dl class="facts" data-reveal>
+            {facts.map((f) => (
+              <div class="fact">
+                <dt class="label">{f.term}</dt>
+                <dd class="fact__value subtitle">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+    </div>
+  </article>
+
+  {
+    study && (
+      <section class="section section--compact">
+        <div class="shell section__inner">
+          <div class="cols cols--split">
+            <p class="label">Context</p>
+            <p class="lead measure ink" data-reveal>{study.context}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section section--compact">
+    <div class="shell section__inner">
+      <div class="cols cols--split">
+        <p class="label">Business problem</p>
+        <p class="lead measure ink" data-reveal>{p.problem}</p>
+      </div>
+    </div>
+  </section>
+
+  {
+    study && (
+      <section class="section section--compact">
+        <div class="shell section__inner">
+          <div class="cols cols--split">
+            <p class="label">Constraints</p>
+            <p class="lead measure ink" data-reveal>{study.constraints}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    study && (
+      <section class="section section--compact">
+        <div class="shell section__inner">
+          <div class="cols cols--split">
+            <p class="label">The decision</p>
+            <p class="lead measure ink" data-reveal>{study.decision}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section section--compact">
+    <div class="shell section__inner">
+      <div class="cols cols--split">
+        <p class="label">Solution</p>
+        <p class="lead measure ink" data-reveal>{p.solution}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--compact">
+    <div class="shell section__inner">
+      <div class="cols cols--split">
+        <p class="label">Highlights</p>
+        <ul class="highlights" data-assemble data-reveal>
+          {
+            p.highlights.map((h: string) => (
+              <li class="highlight" data-step>
+                <span class="marker" aria-hidden="true" />
+                <span class="subtitle">{h}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {
+    study && (
+      <section class="section">
+        <div class="shell section__inner">
+          <SectionHead index="—" label="Decision spread" />
+          <div class="spread">
+            <div class="spread__col" data-reveal>
+              <p class="label">What exists</p>
+              <p class="body ink">{study.spread.exists}</p>
+            </div>
+            <div class="spread__col" data-reveal style="--reveal-delay:60ms">
+              <p class="label">Deliberately not built</p>
+              <p class="body ink">{study.spread.notBuilt}</p>
+            </div>
+          </div>
+          <div class="tradeoff panel panel--sunk" data-reveal style="--reveal-delay:120ms">
+            <p class="label">The tradeoff accepted</p>
+            <p class="body ink">{study.spread.tradeoff}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    study && (
+      <section class="section">
+        <div class="shell section__inner">
+          <SectionHead index="—" label="Evidence" />
+          <div class="evidence">
+            <p class="lead measure ink" data-reveal>{study.evidence.shows}</p>
+
+            {diagram && (
+              <figure class="evidence__figure" data-reveal>
+                {/* Scrolls rather than shrinking: below ~640px a scaled-down
+                    diagram renders its labels illegibly small. The ordered
+                    callouts below carry the same sequence as text, so a
+                    reader who does not scroll loses nothing. */}
+                <div class="evidence__frame">
+                  <Fragment set:html={diagram} />
+                </div>
+                <figcaption class="small">{study.evidence.caption}</figcaption>
+              </figure>
+            )}
+
+            {shots.map((s) => (
+              <figure class="evidence__figure" data-reveal>
+                <div class="evidence__shot">
+                  {/* astro:assets emits intrinsic width/height (no layout
+                      shift) and a modern format, with no extra dependency. */}
+                  <Image
+                    src={s.img}
+                    alt={s.caption}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <figcaption class="small">{s.caption}</figcaption>
+              </figure>
+            ))}
+
+            {!diagram && shots.length === 0 && study.evidence.src && (
+              <figure class="evidence__figure" data-reveal>
+                <img
+                  src={study.evidence.src}
+                  alt={study.evidence.alt ?? study.evidence.shows}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption class="small">{study.evidence.caption}</figcaption>
+              </figure>
+            )}
+
+            {!diagram && shots.length === 0 && !study.evidence.src && (
+              <p class="evidence__caption small measure" data-reveal>
+                {study.evidence.caption}
+              </p>
+            )}
+
+            <ol class="callouts" data-assemble data-reveal>
+              {
+                study.evidence.callouts.map((c: string, i: number) => (
+                  <li class="callout" data-step>
+                    <span class="callout__index mono">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span class="subtitle">{c}</span>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    study && (
+      <section class="section section--compact">
+        <div class="shell section__inner">
+          <div class="cols cols--split">
+            <p class="label">Technical</p>
+            <p class="body measure" data-reveal>{study.technical}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <nav class="section section--tight" aria-label="Next project">
+    <div class="shell section__inner">
+      <a class="next" href={`/work/${next.slug}/`} data-reveal>
+        <span class="label">Next</span>
+        <span class="next__name title">{next.name}</span>
+        <span class="next__arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </nav>
+</Base>
+
+<style>
+  .crumb {
+    margin-block-end: var(--s-6);
+  }
+
+  .crumb a:hover,
+  .crumb a:focus-visible {
+    color: var(--accent);
+  }
+
+  .lede {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-5);
+    padding-block-end: var(--s-6);
+  }
+
+  .lede__name {
+    max-inline-size: 20ch;
+  }
+
+  .lede__one {
+    color: var(--ink-2);
+  }
+
+  .lede__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+  }
+
+  .lede__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+
+  /* Scan layer: the header facts a prioritised reader looks up rather than
+     reads. Same hairline rhythm as .highlights so the page has one rule
+     language, not two. */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+    gap: 0;
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding-block: var(--s-4);
+    padding-inline-end: var(--s-5);
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .fact__value {
+    color: var(--ink);
+  }
+
+  .highlights {
+    display: flex;
+    flex-direction: column;
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .highlight {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--rule);
+  }
+
+  /* The spread — the signature object. Two columns so the built and the
+     deliberately-unbuilt sit at equal weight and can be read against each
+     other; the tradeoff sits beneath both because it is the cost of the
+     choice above it, not a third alternative. */
+  .spread {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    gap: var(--s-6);
+    border-block-start: 1px solid var(--rule);
+    padding-block-start: var(--s-5);
+  }
+
+  .spread__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .tradeoff {
+    margin-block-start: var(--s-6);
+    padding: var(--s-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .evidence {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-5);
+  }
+
+  .evidence__figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .evidence__figure img {
+    inline-size: 100%;
+    block-size: auto;
+    border: 1px solid var(--rule);
+  }
+
+  /* Screenshots sit in the same square hairline frame as the diagrams, so a
+     diagram and a capture read as one evidence set rather than two treatments.
+     No radius, no shadow — the frame is the container language. */
+  .evidence__shot {
+    border: 1px solid var(--rule);
+    background: var(--canvas-sunk);
+    padding: var(--s-3);
+  }
+
+  .evidence__shot img {
+    display: block;
+    border: 1px solid var(--rule);
+  }
+
+  /* --- Evidence diagrams -------------------------------------------------
+     Inlined SVG, so it inherits the page typeface and every colour token.
+     Nothing here is diagram-specific styling invented for one asset: the
+     grammar is the same square containers, hairlines and accent indices the
+     rest of the system already uses. */
+  .evidence__frame {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--canvas-panel);
+    padding: var(--s-5);
+  }
+
+  .evidence__frame :global(.dg) {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 40rem;
+    block-size: auto;
+  }
+
+  /* Containers: square, hairline, panel fill — the box language. */
+  .evidence__frame :global(.dg-node rect) {
+    fill: var(--canvas);
+    stroke: var(--rule-strong);
+    stroke-width: 1;
+    rx: 0;
+  }
+
+  .evidence__frame :global(.dg-node--spine rect) {
+    fill: var(--canvas-sunk);
+    stroke: var(--rule-ink);
+  }
+
+  .evidence__frame :global(.dg-node--out rect) {
+    stroke: var(--rule-ink);
+  }
+
+  /* Index numerals: mono + accent, matching the work-index row language. */
+  .evidence__frame :global(.dg-idx) {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    fill: var(--accent);
+    letter-spacing: 0.04em;
+  }
+
+  .evidence__frame :global(.dg-label) {
+    font-size: 0.875rem;
+    font-weight: var(--fw-medium);
+    fill: var(--ink);
+  }
+
+  .evidence__frame :global(.dg-sub),
+  .evidence__frame :global(.dg-note) {
+    font-size: 0.75rem;
+    fill: var(--ink-3);
+  }
+
+  .evidence__frame :global(.dg-note) {
+    font-style: italic;
+  }
+
+  /* Zones: dashed, unfilled, labelled in the margin — a boundary, not a box. */
+  .evidence__frame :global(.dg-zone rect) {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+
+  .evidence__frame :global(.dg-zone-label) {
+    font-size: 0.6875rem;
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    fill: var(--ink-3);
+  }
+
+  .evidence__frame :global(.dg-line path) {
+    fill: none;
+    stroke: var(--ink-3);
+    stroke-width: 1;
+  }
+
+  .evidence__frame :global(.dg-line--dashed) {
+    stroke-dasharray: 4 3;
+  }
+
+  .evidence__frame :global(.dg-arrowhead) {
+    fill: var(--ink-3);
+    stroke: none;
+  }
+
+  .evidence__caption {
+    color: var(--ink-3);
+  }
+
+  /* Ordered because the callouts are the assembly sequence of the artifact,
+     not an unordered set. */
+  .callouts {
+    display: flex;
+    flex-direction: column;
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .callout {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .callout__index {
+    color: var(--ink-3);
+  }
+
+  .next {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding-block: var(--s-5);
+    border-block-start: 1px solid var(--rule);
+    transition: color var(--dur-1) var(--ease);
+  }
+
+  .next:hover,
+  .next:focus-visible {
+    color: var(--accent);
+  }
+
+  .next__arrow {
+    margin-inline-start: auto;
+    color: var(--ink-3);
+  }
+</style>

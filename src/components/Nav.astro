@@ -1,0 +1,127 @@
+---
+/* NAVIGATION.
+
+   In the document flow, never floating, never overlaying content — the
+   explicit correction to Carl Etkinson's nav, which was captured obscuring
+   its own headline on the live site.
+
+   Small screens get a details/summary disclosure rather than a JS drawer:
+   four items crowd below ~40rem, and a disclosure works with no JavaScript,
+   keeps focus order intact, and closes on selection natively. */
+
+const links = [
+  { href: '/#work', label: 'Work' },
+  { href: '/#approach', label: 'How I work' },
+  { href: '/#about', label: 'About' },
+  { href: '/#contact', label: 'Contact' },
+]
+---
+
+<nav class="nav" aria-label="Primary">
+  <ul class="nav__list nav__list--wide">
+    {links.map((l) => <li><a class="nav__link" href={l.href}>{l.label}</a></li>)}
+  </ul>
+
+  <details class="nav__disclosure">
+    {/* No aria-label: the visible text already names the control, and an
+        aria-label would override it with an identical string for screen
+        reader users while diverging silently if either changes. */}
+    <summary class="nav__toggle">
+      <span class="nav__toggle-text">Menu</span>
+      <span class="nav__toggle-bars" aria-hidden="true"></span>
+    </summary>
+    <ul class="nav__list nav__list--stacked">
+      {links.map((l) => <li><a class="nav__link" href={l.href}>{l.label}</a></li>)}
+    </ul>
+  </details>
+</nav>
+
+<style>
+  .nav__list {
+    display: flex;
+    gap: var(--s-5);
+    font-size: var(--t-meta);
+  }
+
+  .nav__link {
+    color: var(--ink-2);
+    padding-block-end: 2px;
+    border-block-end: 1px solid transparent;
+    transition: color var(--dur-1) var(--ease),
+      border-color var(--dur-1) var(--ease);
+  }
+
+  .nav__link:hover,
+  .nav__link:focus-visible {
+    color: var(--accent);
+    border-block-end-color: currentColor;
+  }
+
+  .nav__disclosure {
+    display: none;
+    position: relative;
+  }
+
+  .nav__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--t-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    border: 1px solid var(--rule-ink);
+    padding: var(--s-2) var(--s-3);
+  }
+
+  .nav__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav__toggle-bars {
+    inline-size: 12px;
+    block-size: 8px;
+    background:
+      linear-gradient(currentColor, currentColor) 0 0 / 12px 1.5px no-repeat,
+      linear-gradient(currentColor, currentColor) 0 3.25px / 12px 1.5px no-repeat,
+      linear-gradient(currentColor, currentColor) 0 6.5px / 12px 1.5px no-repeat;
+  }
+
+  .nav__list--stacked {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-start: calc(100% + var(--s-2));
+    z-index: 30;
+    flex-direction: column;
+    gap: 0;
+    min-inline-size: 12rem;
+    background: var(--canvas-panel);
+    border: 1px solid var(--rule-strong);
+  }
+
+  .nav__list--stacked li + li {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .nav__list--stacked .nav__link {
+    display: block;
+    padding: var(--s-3) var(--s-4);
+    border-block-end: 0;
+  }
+
+  .nav__list--stacked .nav__link:hover,
+  .nav__list--stacked .nav__link:focus-visible {
+    background: var(--accent-quiet);
+  }
+
+  @media (max-width: 48rem) {
+    .nav__list--wide {
+      display: none;
+    }
+    .nav__disclosure {
+      display: block;
+    }
+  }
+</style>

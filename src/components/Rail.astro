@@ -1,0 +1,88 @@
+---
+/* THE RAIL — a persistent brand spine, and the single identity on desktop.
+
+   Both Elias and BrightEdge anchor the page with a fixed left rail. It makes
+   a long scroll read as one organised document rather than a stack of
+   sections.
+
+   Two deliberate subtractions:
+   - No social links. They duplicated the footer, and `EM / GH / LI` initials
+     were unreadable as labels. The rail carries brand, the footer carries
+     contact.
+   - The wordmark here is the ONLY appearance of the name on desktop; the top
+     bar suppresses its own name while this is visible, so identity is stated
+     once per viewport rather than four times per page.
+
+   Fixed, never overlapping: the document is inset past it via body padding —
+   the correction to Carl Etkinson's nav, which was captured obscuring its own
+   headline on the live site. */
+---
+
+<div class="rail">
+  <a class="rail__mark" href="/" aria-label="Mahmoud Mohsen — home">
+    <span class="rail__glyph" aria-hidden="true"></span>
+  </a>
+
+  <span class="rail__wordmark">Mahmoud Mohsen</span>
+
+  <span class="rail__foot" aria-hidden="true"></span>
+</div>
+
+<style>
+  .rail {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--rail-w);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--s-5);
+    background: var(--canvas);
+    border-inline-end: 1px solid var(--rule);
+  }
+
+  .rail__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border: 1px solid var(--rule-ink);
+  }
+
+  /* A mark, not a logo: three stacked strokes, the middle one shortened and
+     accented. Reads as a stack, a layer, a system — derived from the
+     positioning rather than borrowed from any reference's logomark. */
+  .rail__glyph {
+    inline-size: 14px;
+    block-size: 10px;
+    background:
+      linear-gradient(var(--ink), var(--ink)) 0 0 / 14px 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) 0 4px / 8px 2px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) 0 8px / 14px 2px no-repeat;
+  }
+
+  .rail__wordmark {
+    writing-mode: vertical-rl;
+    font-size: var(--t-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* Balances the mark at the opposite end so the wordmark sits optically
+     centred rather than merely mathematically centred. */
+  .rail__foot {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+
+  @media (max-width: 64rem) {
+    .rail {
+      display: none;
+    }
+  }
+</style>

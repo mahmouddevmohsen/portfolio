@@ -1,0 +1,31 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# environment
+.env
+.env.production
+.env.local
+
+# editor / os
+.DS_Store
+Thumbs.db
+*.swp
+.vs/
+
+# logs
+npm-debug.log*
+yarn-error.log*
+
+# ---------------------------------------------------------------------------
+# Working material: source documents, drafts and internal notes.
+#
+# Excluded deliberately, not by oversight. This directory holds unredacted
+# source material for the case studies. The copies published under
+# src/assets/evidence/ are redacted to satisfy each project's disclosure
+# terms, and this repository is public with permanent history — so the
+# originals must not be committed here.
+docs/

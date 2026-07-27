@@ -1,0 +1,78 @@
+---
+/* CHIP — one primitive for every small bordered label in the system.
+
+   Consolidates four near-duplicate treatments that had drifted apart across
+   the card, the project lede, the status marker, and the focus list. Drift
+   between visually-identical-but-separately-defined elements is exactly what
+   makes a design read as unmaintained, which is the thing this portfolio
+   argues against.
+
+   Variants:
+     tag     — stack items, capability labels. Grotesque. Deliberately NOT
+               monospace: mono tech-tag strips are Elias's developer tell.
+     status  — system state. Monospace, because status is machine-truth
+               about a system and mono reads as precision. Never colour-coded:
+               a pilot must carry the same design confidence as a live system.
+     quiet   — lower-emphasis listing, e.g. current focus.
+*/
+
+interface Props {
+  label: string
+  variant?: 'tag' | 'status' | 'quiet'
+}
+
+const { label, variant = 'tag' } = Astro.props
+---
+
+<span class:list={['chip', `chip--${variant}`, variant === 'status' && 'mono']}>
+  {variant === 'status' && <span class="marker marker--state" aria-hidden="true"></span>}
+  {label}
+</span>
+
+<style>
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    border: 1px solid var(--rule);
+    padding: 0.2rem var(--s-2);
+    /* 11px uppercase with tracking was legible but effortful, and chips carry
+       status — the one label a hurried reader must not have to work at. */
+    font-size: var(--t-label);
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  /* Stack tags: borderless. Six outlined boxes per card were competing with
+     the project name and reproducing Elias's bordered tech-tag strip — the
+     one motif the reference audit marks as the developer tell. A recessed
+     fill keeps them scannable as discrete tokens while dropping them a full
+     level in the hierarchy. Substrate should read as substrate. */
+  .chip--tag {
+    border-color: transparent;
+    background: var(--canvas-sunk);
+    color: var(--ink-3);
+  }
+
+  /* Status keeps its outline. It is a top-five credibility device and the one
+     label a hurried reader must not have to hunt for. */
+  .chip--status {
+    border-color: var(--rule-strong);
+    color: var(--ink-2);
+    padding-inline: var(--s-2);
+    padding-block: 0.25rem;
+  }
+
+  .chip--quiet {
+    border-color: var(--rule-strong);
+    padding: var(--s-2) var(--s-4);
+    font-size: var(--t-small);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-2);
+    white-space: normal;
+  }
+</style>

@@ -1,0 +1,157 @@
+---
+import '../styles/tokens.css'
+import '../styles/base.css'
+import '../styles/layout.css'
+import '../styles/type.css'
+import '../styles/motion.css'
+import Rail from '../components/Rail.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+
+interface Props {
+  title: string
+  description: string
+  /** `article` for project case studies, `website` for everything else. */
+  type?: 'website' | 'article'
+  /** Error/utility pages that must never be indexed or treated as canonical. */
+  noindex?: boolean
+}
+
+const { title, description, type = 'website', noindex = false } = Astro.props
+
+/* Canonical + absolute OG URLs.
+
+   `Astro.site` is deliberately a reserved `.invalid` domain until a real one
+   is set (see astro.config.mjs). That is the intended failure mode: an
+   obviously-broken canonical is recoverable, a silently-wrong one that gets
+   indexed is not. Setting `site` fixes every URL below at once. */
+const canonical = new URL(Astro.url.pathname, Astro.site).href
+
+/* Absolute, because crawlers do not resolve relative OG image paths. Shares
+   `Astro.site`, so setting the production domain fixes this URL at the same
+   moment it fixes every canonical. */
+const ogImage = new URL('/og.png', Astro.site).href
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* The one font file, on the critical path. Preloaded so it is fetched in
+        parallel with the stylesheet rather than after it — without this the
+        browser only discovers the @font-face once CSS has parsed. */}
+    <link
+      rel="preload"
+      href="/fonts/inter-tight-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Mahmoud Mohsen" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mahmoud Mohsen — I design systems for businesses that don't have an engineering team." />
+
+    {/* Upgraded from `summary` now that a real 1200x630 asset exists. The
+        small card was a deliberate fallback: a large card without an image
+        renders as a broken placeholder. */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <script is:inline>
+      document.documentElement.classList.add('js')
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Rail />
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+
+    {/* Appendix slot — content that belongs after the contact block rather
+        than competing with it for the pre-CTA position. Renders nothing when
+        a page supplies no `appendix` content, so every other page is
+        unaffected. Fill it with a landmark element (<aside>), never a bare
+        <div>: anything here sits outside <main> and <footer>, so without one
+        it would be unreachable by landmark navigation. */}
+    <slot name="appendix" />
+
+    <script>
+      const targets = document.querySelectorAll('[data-reveal], [data-assemble]')
+
+      if (!('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-revealed'))
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue
+              entry.target.classList.add('is-revealed')
+              io.unobserve(entry.target)
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.04 }
+        )
+        targets.forEach((el) => io.observe(el))
+      }
+
+      document.querySelectorAll('[data-assemble]').forEach((group) => {
+        group.querySelectorAll('[data-step]').forEach((step, i) => {
+          ;(step as HTMLElement).style.setProperty('--step-index', String(i))
+        })
+      })
+
+      /* Reveal-on-scroll-up for the top bar.
+         Hidden while moving down the page (reading), restored the moment the
+         reader moves back up (navigating). Always shown near the top.
+         A small threshold prevents flicker on trackpad jitter, and reduced-
+         motion users get the bar pinned rather than sliding. */
+      const bar = document.querySelector<HTMLElement>('[data-bar]')
+      if (bar) {
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+        let last = window.scrollY
+        let ticking = false
+
+        const update = () => {
+          const y = window.scrollY
+          const delta = y - last
+          if (Math.abs(delta) > 6) {
+            const hide = delta > 0 && y > 160 && !reduced
+            bar.dataset.hidden = String(hide)
+            last = y
+          }
+          ticking = false
+        }
+
+        addEventListener(
+          'scroll',
+          () => {
+            if (ticking) return
+            ticking = true
+            requestAnimationFrame(update)
+          },
+          { passive: true }
+        )
+      }
+    </script>
+  </body>
+</html>

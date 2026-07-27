@@ -1,0 +1,192 @@
+/* ============================================================================
+   BASE — reset and element defaults. Elements only, no components.
+   ========================================================================= */
+
+/* --- Typeface -------------------------------------------------------------
+   Inter Tight, self-hosted. ONE file: Google serves this as a variable font,
+   so a single 44KB woff2 covers the full 400–700 axis rather than shipping
+   two static weights. Latin subset only — the site is English.
+
+   Self-hosted rather than linked because a font CDN would introduce the only
+   external host on an otherwise zero-third-party site, adding a DNS lookup
+   and TLS handshake to the critical path.
+
+   `swap` so text paints immediately in the fallback and never blocks render.
+   ------------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Inter Tight';
+  src: url('/fonts/inter-tight-latin-var.woff2') format('woff2-variations'),
+    url('/fonts/inter-tight-latin-var.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+  min-height: 100vh;
+  /* The rail is fixed; the document is inset past it. */
+  padding-inline-start: var(--rail-w);
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+svg {
+  fill: currentColor;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p a,
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: text-decoration-color var(--dur-1) var(--ease);
+}
+
+p a:hover,
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+/* Any control sitting on the inverted surface flips the ring to the canvas
+   colour, which holds ~15:1 against near-black. Apply alongside a dark
+   background rather than writing a bespoke focus rule per component. */
+.on-invert {
+  --focus-color: var(--canvas);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+hr {
+  border: 0;
+  border-block-start: 1px solid var(--rule);
+}
+
+/* ---------------------------------------------------------------------------
+   MARKER — one marker language, one semantic system.
+
+   Previously three near-identical small squares existed with different sizes
+   and colours meaning different things (status state, list bullet, highlight
+   tick). Two markers a reader cannot tell apart, meaning different things, is
+   worse than one marker meaning nothing.
+
+   The system is now binary and legible:
+     .marker           neutral — this is an item in a list
+     .marker--state    accent  — this reports the state of a real system
+
+   Accent on a marker therefore always means "system state" and nothing else.
+   ------------------------------------------------------------------------ */
+.marker {
+  inline-size: 5px;
+  block-size: 5px;
+  flex: none;
+  background: var(--rule-strong);
+}
+
+.marker--state {
+  background: var(--accent);
+}
+
+/* Monospace is contained to status and indices via .mono. It must never be
+   applied to navigation, headings, or body copy — that is the developer
+   costume this portfolio is explicitly not wearing. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--accent-quiet);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--s-4);
+  inset-block-start: -100%;
+  z-index: 100;
+  background: var(--canvas-panel);
+  border: 1px solid var(--rule-strong);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-meta);
+}
+
+.skip-link:focus {
+  inset-block-start: var(--s-4);
+}

@@ -1,0 +1,73 @@
+/* ============================================================================
+   MOTION LANGUAGE
+
+   Three categories, per the locked rule:
+     1. EXPLANATORY  — carries information (artifact assembly, sequence).
+     2. CONTINUITY   — preserves orientation, reduces jarring, sets tempo.
+     3. ATTENTION    — exists to be noticed. Not implemented. There is no
+                       token, class, or utility for it in this codebase.
+
+   The test: would the reader notice the motion itself, or only its effect?
+   Enforcement: durations, displacement and easing are token-bound above.
+   Long, large or bouncy motion cannot be expressed with these values.
+   ========================================================================= */
+
+/* --- CONTINUITY -----------------------------------------------------------
+   A quiet entrance. Its purpose is to stop content appearing abruptly as
+   the reader scrolls, not to announce itself. 6px and 240ms are below the
+   threshold at which motion reads as an effect.
+   -------------------------------------------------------------------- */
+/* Scoped to html.js — the class is set by an inline script before paint.
+   Without JS the initial hidden state is never applied, so content is
+   visible by default. Failing OPEN is mandatory: this is a verification
+   artifact, and a reader who sees a blank page cannot verify anything. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--shift));
+  transition: opacity var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- EXPLANATORY ----------------------------------------------------------
+   Artifact assembly. A system is a sequence, and showing that sequence is
+   information a static image cannot carry. Steps resolve in order; the
+   final state is the complete artifact.
+   -------------------------------------------------------------------- */
+.js [data-assemble] > [data-step] {
+  opacity: 0;
+  transform: translateY(calc(var(--shift) * 0.6));
+  transition: opacity var(--dur-3) var(--ease-out),
+    transform var(--dur-3) var(--ease-out);
+  transition-delay: calc(var(--step-index, 0) * var(--stagger));
+}
+
+.js [data-assemble].is-revealed > [data-step] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Reduced motion: the artifact degrades to its assembled final state,
+   which is the whole point — the information survives, the timing does not. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-assemble] > [data-step] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* --- STATE ----------------------------------------------------------------
+   Interaction feedback. Fast enough to feel like a property of the object
+   rather than an animation of it.
+   -------------------------------------------------------------------- */
+.interactive {
+  transition: background-color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}

@@ -1,0 +1,105 @@
+/* ============================================================================
+   TYPE
+
+   One grotesque carries everything. Serif is gone — three of four references
+   use none, and the one that does is the reference whose feel was rejected.
+
+   Display stays large. BrightEdge proved an enormous headline reads as
+   operational rather than editorial when it is heavy, tightly set, and has
+   structure adjacent to it. The v1 build's problem was a serif alone in
+   whitespace, not the size.
+   ========================================================================= */
+
+/* Sentence case, not uppercase. BrightEdge sets ONE WORD in caps; a whole
+   sentence in heavy uppercase becomes a wall the reader has to climb rather
+   than a statement they can absorb. Weight carries the authority instead. */
+.display {
+  font-size: var(--t-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  text-wrap: balance;
+}
+
+/* Reserved for single words or very short labels. */
+.display--caps {
+  text-transform: uppercase;
+  font-weight: var(--fw-black);
+  line-height: var(--lh-display);
+}
+
+.section-title {
+  font-size: var(--t-section);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  text-wrap: balance;
+}
+
+.title {
+  font-size: var(--t-title);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-title);
+}
+
+.subtitle {
+  font-size: var(--t-sub);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-title);
+}
+
+.lead {
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.body {
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+}
+
+.small {
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.meta {
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+}
+
+.label {
+  font-size: var(--t-label);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Astra's one genuinely transferable device: hierarchy inside a single
+   sentence, with no change of size or face. */
+.dim {
+  color: var(--ink-3);
+}
+
+.prose > * + * {
+  margin-block-start: var(--s-4);
+}
+
+.ink {
+  color: var(--ink);
+}
+.ink-2 {
+  color: var(--ink-2);
+}
+.ink-3 {
+  color: var(--ink-3);
+}
+.accent {
+  color: var(--accent);
+}

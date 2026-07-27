@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base title="Not found — Mahmoud Mohsen" description="That page doesn't exist." noindex>
+  <section class="section section--tight">
+    <div class="shell section__inner nf">
+      <p class="label">404</p>
+      <h1 class="display nf__title">That page doesn&rsquo;t exist.</h1>
+      <p class="lead nf__sub">
+        Nothing here. <span class="dim">The work is on the home page.</span>
+      </p>
+      <a class="nf__back" href="/">
+        <span>Back to the work</span>
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-4);
+    padding-block: var(--s-8) var(--s-9);
+  }
+
+  .nf__title {
+    max-inline-size: 18ch;
+  }
+
+  .nf__sub {
+    max-inline-size: 40ch;
+  }
+
+  .nf__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-block-start: var(--s-3);
+    padding: var(--s-3) var(--s-5);
+    border: 1px solid var(--rule-ink);
+    font-size: var(--t-meta);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.02em;
+    transition: background-color var(--dur-1) var(--ease),
+      color var(--dur-1) var(--ease);
+  }
+
+  .nf__back:hover,
+  .nf__back:focus-visible {
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+  }
+</style>

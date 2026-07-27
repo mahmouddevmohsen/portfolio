@@ -1,0 +1,137 @@
+/* ============================================================================
+   LAYOUT — the box language.
+
+   Elias's contribution, re-derived: visible structure. Bordered containers,
+   hairline rules, dense adjacency. Structure you can SEE rather than infer.
+   The v1 build used rules and whitespace only, which read as editorial.
+   ========================================================================= */
+
+.shell {
+  max-inline-size: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* --- Section ------------------------------------------------------------ */
+.section {
+  border-block-start: 1px solid var(--rule);
+}
+
+.section:first-of-type {
+  border-block-start: 0;
+}
+
+.section__inner {
+  padding-block: var(--pace-normal);
+}
+
+.section--tight .section__inner {
+  padding-block: var(--pace-tight);
+}
+
+/* Pacing is deliberately uneven — uniform full-height sections exhaust the
+   reader and flatten importance. `compact` is for short single-block
+   sections (the project skeletons), where normal pacing leaves two short
+   paragraphs marooned in 10rem of emptiness. */
+.section--compact .section__inner {
+  padding-block: var(--s-6);
+}
+
+/* --- Section head: eyebrow + rule, Elias's labelled header re-derived --- */
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  margin-block-end: var(--s-7);
+}
+
+.head__index {
+  font-size: var(--t-label);
+  font-weight: var(--fw-medium);
+  color: var(--accent);
+  letter-spacing: var(--ls-label);
+  flex: none;
+}
+
+.head__label {
+  font-size: var(--t-label);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink);
+  flex: none;
+}
+
+/* The trailing rule that runs to the margin — the one Elias motif worth
+   keeping, stripped of its hashtag glyph and its palette. */
+.head__rule {
+  flex: 1 1 auto;
+  block-size: 1px;
+  background: var(--rule);
+  transform: translateY(-0.25em);
+}
+
+.head__aside {
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  flex: none;
+}
+
+/* --- Grids -------------------------------------------------------------- */
+.cols {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.cols--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cols--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cols--split {
+  grid-template-columns: minmax(0, var(--label-col)) minmax(0, 1fr);
+  gap: var(--s-6);
+}
+
+.measure {
+  max-inline-size: var(--measure);
+}
+
+/* --- Panel: the bordered container ------------------------------------- */
+.panel {
+  border: 1px solid var(--rule);
+  background: var(--canvas-panel);
+}
+
+.panel--sunk {
+  background: var(--canvas-sunk);
+  border-color: var(--rule);
+}
+
+@media (max-width: 64rem) {
+  .cols--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cols--split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+}
+
+@media (max-width: 40rem) {
+  .cols--2,
+  .cols--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .head {
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+  .head__rule {
+    order: 10;
+    flex-basis: 100%;
+  }
+}

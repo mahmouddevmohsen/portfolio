@@ -1,0 +1,99 @@
+<svg
+  class="dg"
+  viewBox="0 -14 1180 394"
+  role="img"
+  aria-labelledby="dg-jos-title dg-jos-desc"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id="dg-jos-title">JARVIS OS — execution and verification architecture</title>
+  <desc id="dg-jos-desc">
+    A user request enters an action registry, which dispatches to the execution
+    engine. The engine's effect is not reported directly: system state is
+    validated independently, an independent verifier reads that state, and only
+    a confirmed result is reported as success. Execution and verification are
+    separate paths.
+  </desc>
+
+  <!-- zones -->
+  <g class="dg-zone">
+    <rect x="8" y="16" width="694" height="150" />
+    <text class="dg-zone-label" x="20" y="6">Action execution</text>
+  </g>
+  <g class="dg-zone">
+    <rect x="8" y="196" width="924" height="150" />
+    <text class="dg-zone-label" x="20" y="186">Structural verification — independent</text>
+  </g>
+
+  <!-- connectors -->
+  <g class="dg-line">
+    <path d="M216 91 H236" marker-end="url(#dg-arrow2)" />
+    <path d="M446 91 H466" marker-end="url(#dg-arrow2)" />
+    <!-- execution engine mutates system state (down) -->
+    <path d="M576 136 V271 H556" marker-end="url(#dg-arrow2)" />
+    <!-- state validation -> verifier -->
+    <path d="M346 271 H326" marker-end="url(#dg-arrow2)" />
+    <!-- verifier -> verified result -->
+    <path d="M96 236 V116 H236" class="dg-line--dashed" marker-end="url(#dg-arrow2)" />
+    <!-- verified result out -->
+    <path d="M932 271 H962" marker-end="url(#dg-arrow2)" />
+  </g>
+
+  <!-- the gate note -->
+  <text class="dg-note" x="180" y="150">confirms — or the action does not report success</text>
+
+  <!-- nodes: execution -->
+  <g class="dg-node">
+    <rect x="16" y="56" width="200" height="70" />
+    <text class="dg-idx" x="28" y="80">01</text>
+    <text class="dg-label" x="28" y="102">User request</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="246" y="56" width="200" height="70" />
+    <text class="dg-idx" x="258" y="80">02</text>
+    <text class="dg-label" x="258" y="102">Action registry</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="476" y="56" width="200" height="70" />
+    <text class="dg-idx" x="488" y="80">03</text>
+    <text class="dg-label" x="488" y="102">Execution engine</text>
+  </g>
+
+  <!-- nodes: verification -->
+  <g class="dg-node">
+    <rect x="16" y="236" width="200" height="70" />
+    <text class="dg-idx" x="28" y="260">04</text>
+    <text class="dg-label" x="28" y="282">Independent verifier</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="356" y="236" width="200" height="70" />
+    <text class="dg-idx" x="368" y="260">05</text>
+    <text class="dg-label" x="368" y="282">System state</text>
+    <text class="dg-label" x="368" y="298">validation</text>
+  </g>
+
+  <g class="dg-node dg-node--out">
+    <rect x="732" y="236" width="200" height="70" />
+    <text class="dg-idx" x="744" y="260">06</text>
+    <text class="dg-label" x="744" y="282">Verified result</text>
+  </g>
+
+  <text class="dg-note" x="962" y="266">reported only</text>
+  <text class="dg-note" x="962" y="282">after state confirms</text>
+
+  <defs>
+    <marker
+      id="dg-arrow2"
+      viewBox="0 0 8 8"
+      refX="7"
+      refY="4"
+      markerWidth="8"
+      markerHeight="8"
+      orient="auto-start-reverse"
+    >
+      <path class="dg-arrowhead" d="M0 1 L7 4 L0 7 Z" />
+    </marker>
+  </defs>
+</svg>

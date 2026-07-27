@@ -1,0 +1,176 @@
+/* ============================================================================
+   DESIGN TOKENS — single source of truth.
+
+   Revised after first-hand inspection of all four references.
+   Key reversals from the first build, all evidence-driven:
+     - Serif REMOVED as identity face. 3 of 4 references use no serif; the one
+       that does reads as an editorial magazine, which was rejected.
+     - Display type stays LARGE but becomes heavy grotesque. Size was never
+       the problem — the face and the isolation were.
+     - Accent widened from "interaction only" to a defined semantic set:
+       indices, eyebrows, interaction. Every reference uses its accent for
+       numbering and labels, not just links.
+     - Density increased substantially. All four are denser than the v1 build.
+     - Monospace returns, strictly contained: status and indices only.
+       It reads as machine-truth/precision, not as a developer costume,
+       provided it never touches navigation, headings, or body.
+   ========================================================================= */
+
+:root {
+  /* --- CANVAS ------------------------------------------------------- */
+  --canvas: #f7f6f3;
+  --canvas-panel: #ffffff;
+  --canvas-sunk: #efeeea;
+  --canvas-invert: #141414;
+
+  /* --- INK — high contrast is mandatory ----------------------------- */
+  --ink: #141414;
+  --ink-2: #414141;
+  --ink-3: #6b6b6b;
+  --ink-invert: #f7f6f3;
+
+  /* --- STRUCTURE — the box language, borrowed from Elias ------------ */
+  --rule: #dedcd6;
+  --rule-strong: #c2bfb7;
+  --rule-ink: #141414;
+
+  /* --- ACCENT — one hue, defined semantics -------------------------- */
+  /* Not purple / crimson / orange (those are Elias, Carl, BrightEdge).
+     Permitted: indices, eyebrow labels, interaction, active state.
+     Forbidden: backgrounds, gradients, decoration. */
+  --accent: #0d5566;
+  --accent-hover: #093c48;
+  --accent-quiet: rgba(13, 85, 102, 0.08);
+
+  /* --- TYPE --------------------------------------------------------- */
+  /* One grotesque carries display, structure and body. Inter Tight, chosen
+     for its narrower set width: at the display sizes below it holds more
+     characters per line than Inter, which keeps the headline to three lines
+     and the proof above the fold. Self-hosted (see base.css) — a webfont CDN
+     would be the only external host on the site. */
+  --font-sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Contained: status chips, indices, figures. Never nav, heading or body. */
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --t-micro: 0.6875rem;
+  --t-label: 0.75rem;
+  --t-meta: 0.8125rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-lead: 1.125rem;
+  --t-sub: 1.375rem;
+  --t-title: clamp(1.5rem, 1.1rem + 1.6vw, 2rem);
+  --t-section: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+  /* Capped hard. An earlier build let this reach 88px, which filled the
+     viewport and pushed every piece of proof below the fold — the exact
+     failure this design exists to avoid. The first screen must raise
+     confidence, not supply atmosphere. */
+  --t-display: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);
+
+  /* Sub-1.0, for UPPERCASE display only (--display--caps).
+     Measured on BrightEdge: 180px on 144px leading (0.80), 80px on 72px
+     (0.90). That works there because its display type is uppercase single
+     words, which have no descenders.
+
+     ⚠️ Do NOT apply this to sentence-case text. Measured directly in Inter
+     Tight at 52px: ascent 40px + descent 12px = 52px of ink against a 46.8px
+     line box — a 5.2px overlap, with adjacent line rects colliding by 16px.
+     The floor for sentence case is therefore 1.0 (ink height ÷ font size). */
+  --lh-display: 0.9;
+  /* 1.02 — just above the measured 1.0 collision floor. Tightened from 1.08:
+     a real density gain on display and section titles with clearance intact. */
+  --lh-tight: 1.02;
+  --lh-snug: 1.25;
+  --lh-body: 1.55;
+
+  --ls-display: -0.035em;
+  --ls-title: -0.02em;
+  --ls-label: 0.1em;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  /* --- SPACE — one scale, tightened -------------------------------- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 2.75rem;
+  --s-8: 3.5rem;
+  --s-9: 5rem;
+  --s-10: 7rem;
+
+  /* Tightened one step. Measured live: at the previous value an entire
+     1350×625 viewport could contain nothing between sections — the "airy and
+     isolated" failure the reference audit named. Astra runs 300px section
+     padding; BrightEdge's operational rows run 40px. We sit deliberately
+     nearer BrightEdge. */
+  --pace-tight: var(--s-6);
+  --pace-normal: var(--s-8);
+  --pace-slow: var(--s-9);
+
+  /* --- SHAPE -------------------------------------------------------- */
+  /* Square by default. Carl and Astra both hold 0px across ~1000+ and ~2400+
+     elements respectively; BrightEdge's 99px pills are its most dated trait.
+     Sharp corners read as engineered. The round token exists only for the
+     circular row control. */
+  --radius: 0;
+  --radius-round: 50%;
+
+  /* --- LAYOUT ------------------------------------------------------- */
+  --rail-w: 4.5rem; /* persistent brand spine — Elias + BrightEdge */
+  --measure: 36rem; /* reading column */
+  --label-col: 8.5rem; /* margin scan layer */
+  --gutter: 2rem;
+  --content-max: 76rem;
+
+  /* --- MOTION — improves reading, never attracts attention ---------- */
+  --dur-1: 120ms;
+  --dur-2: 240ms;
+  --dur-3: 400ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --shift: 8px;
+  --stagger: 55ms;
+
+  /* Focus indicator.
+     The accent holds 9.3:1 against the canvas, but only ~2:1 against the
+     near-black surfaces used by the primary actions — a focus ring that
+     disappears on the two most important controls on the site. Components
+     with a dark surface override --focus-color rather than restating the
+     whole ring, so the indicator is defined once. */
+  --focus-color: var(--accent);
+  --focus-width: 2px;
+  --focus-offset: 3px;
+  /* NOTE: do not re-introduce a composed `--focus-ring: 2px solid
+     var(--focus-color)` here. A custom property's value is substituted at the
+     element where it is DECLARED, so composing it at :root bakes in the root
+     value of --focus-color and no descendant override can ever change it.
+     The parts are applied separately in base.css so --focus-color resolves
+     against the focused element instead. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+    --shift: 0px;
+    --stagger: 0ms;
+  }
+}
+
+@media (max-width: 64rem) {
+  :root {
+    --rail-w: 0rem;
+    --label-col: 0rem;
+    --gutter: 1.25rem;
+  }
+}

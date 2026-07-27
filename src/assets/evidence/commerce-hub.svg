@@ -1,0 +1,94 @@
+<svg
+  class="dg"
+  viewBox="0 -14 1180 414"
+  role="img"
+  aria-labelledby="dg-chb-title dg-chb-desc"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id="dg-chb-title">Commerce Hub — operations architecture</title>
+  <desc id="dg-chb-desc">
+    A responsive interface forms the presentation layer. Beneath a separation
+    line, the operations dashboard sits as the operational centre rather than a
+    secondary admin panel, and drives order, product and customer management
+    plus analytics. Presentation is kept separate from operational logic.
+  </desc>
+
+  <!-- presentation layer -->
+  <g class="dg-zone">
+    <rect x="8" y="16" width="1164" height="92" />
+    <text class="dg-zone-label" x="20" y="6">Presentation</text>
+  </g>
+
+  <!-- operational layer -->
+  <g class="dg-zone">
+    <rect x="8" y="150" width="1164" height="222" />
+    <text class="dg-zone-label" x="20" y="140">Operational logic</text>
+  </g>
+
+  <!-- separation annotation -->
+  <text class="dg-note" x="1164" y="130" text-anchor="end">
+    presentation separated from operational logic
+  </text>
+
+  <!-- connectors -->
+  <g class="dg-line">
+    <path d="M590 108 V186" marker-end="url(#dg-arrow4)" />
+    <path d="M470 256 H330" marker-end="url(#dg-arrow4)" />
+    <path d="M710 256 H850" marker-end="url(#dg-arrow4)" />
+    <path d="M590 291 V326 H330" marker-end="url(#dg-arrow4)" />
+    <path d="M590 291 V326 H850" marker-end="url(#dg-arrow4)" />
+  </g>
+
+  <!-- nodes -->
+  <g class="dg-node">
+    <rect x="490" y="38" width="200" height="60" />
+    <text class="dg-idx" x="502" y="62">06</text>
+    <text class="dg-label" x="502" y="84">Responsive interface</text>
+  </g>
+
+  <g class="dg-node dg-node--spine">
+    <rect x="470" y="186" width="240" height="105" />
+    <text class="dg-idx" x="482" y="210">01</text>
+    <text class="dg-label" x="482" y="232">Operations dashboard</text>
+    <text class="dg-sub" x="482" y="250">the operational center,</text>
+    <text class="dg-sub" x="482" y="266">not an admin panel</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="130" y="221" width="200" height="70" />
+    <text class="dg-idx" x="142" y="245">02</text>
+    <text class="dg-label" x="142" y="267">Order management</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="850" y="221" width="200" height="70" />
+    <text class="dg-idx" x="862" y="245">03</text>
+    <text class="dg-label" x="862" y="267">Product management</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="130" y="311" width="200" height="46" />
+    <text class="dg-idx" x="142" y="335">04</text>
+    <text class="dg-label" x="142" y="341">Customer management</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="850" y="311" width="200" height="46" />
+    <text class="dg-idx" x="862" y="335">05</text>
+    <text class="dg-label" x="862" y="341">Analytics</text>
+  </g>
+
+  <defs>
+    <marker
+      id="dg-arrow4"
+      viewBox="0 0 8 8"
+      refX="7"
+      refY="4"
+      markerWidth="8"
+      markerHeight="8"
+      orient="auto-start-reverse"
+    >
+      <path class="dg-arrowhead" d="M0 1 L7 4 L0 7 Z" />
+    </marker>
+  </defs>
+</svg>

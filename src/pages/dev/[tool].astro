@@ -1,0 +1,75 @@
+---
+import type { GetStaticPaths } from 'astro'
+
+/* DEV-ONLY responsive harness.
+
+   Previously lived in `public/_viewport.html`, which meant it shipped — it was
+   present in `dist/` and publicly reachable. A dynamic route whose
+   `getStaticPaths` returns an empty array in production is the clean fix:
+   the dev server generates it, `astro build` emits nothing.
+
+   Usage: http://localhost:4321/dev/viewport?path=/
+
+   Why an iframe: the browser-automation tooling cannot resize the layout
+   viewport (`window.innerWidth` stays pinned regardless of window size), so
+   narrow-width behaviour was unverifiable. An iframe establishes its own
+   layout viewport, so media queries inside it evaluate against the iframe's
+   width — making responsive behaviour genuinely testable rather than assumed. */
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  if (!import.meta.env.DEV) return []
+  return [{ params: { tool: 'viewport' } }]
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Viewport harness (dev only)</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      body {
+        margin: 0;
+        padding: 12px;
+        background: #22252a;
+        font: 12px/1.4 ui-monospace, monospace;
+        color: #cfd3da;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .vp {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .vp__label {
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8b929c;
+      }
+      iframe {
+        border: 1px solid #3a3f47;
+        background: #fff;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vp">
+      <span class="vp__label" id="l1">390 × 780 — phone</span>
+      <iframe id="f1" width="390" height="780"></iframe>
+    </div>
+    <div class="vp">
+      <span class="vp__label">768 × 780 — tablet</span>
+      <iframe id="f2" width="768" height="780"></iframe>
+    </div>
+    <script is:inline>
+      var path = new URLSearchParams(location.search).get('path') || '/'
+      document.getElementById('f1').src = path
+      document.getElementById('f2').src = path
+      document.getElementById('l1').textContent = '390 × 780 — phone — ' + path
+    </script>
+  </body>
+</html>

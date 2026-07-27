@@ -1,0 +1,259 @@
+---
+/* PROJECT ROW — the work index. Homepage preview only, not a case study.
+
+   Rebuilt from a 2-up bordered card into a full-width numbered row.
+
+   Why: measured live, the 2-up grid left ~330px for the title, which forced
+   every multi-word project name onto two lines ("Business / Automation
+   Engine"). Full width puts each name on one line at display scale.
+
+   Structure is BrightEdge's numbered row, measured on the live site: accent
+   index · large name · small muted qualifier riding the SAME baseline as the
+   name (this is the detail that makes it read as one operational line rather
+   than a stacked list item) · control at the far right · hairline below.
+
+   No information was dropped in the rebuild. The full width is spent on a
+   two-column prose block, so problem and solution sit side by side instead
+   of stacked in a narrow column — denser, and the same words.
+
+   Deliberately absent: any screenshot, metric, timeline, or business result.
+   The row carries only what has been stated as fact. */
+
+import Chip from './Chip.astro'
+
+interface Props {
+  index: number
+  slug: string
+  name: string
+  status: 'Live' | 'Pilot' | 'Ongoing' | 'Personal'
+  problem: string
+  solution: string
+  /* The decision spread's strongest half, surfaced on the index. Optional:
+     the schema allows a project without a study, and the block is skipped
+     rather than rendered empty. */
+  notBuilt?: string
+  highlights: string[]
+  stack: string[]
+}
+
+const {
+  index,
+  slug,
+  name,
+  status,
+  problem,
+  solution,
+  notBuilt,
+  highlights,
+  stack,
+} = Astro.props
+const num = String(index).padStart(2, '0')
+---
+
+<article class="wrow" data-reveal>
+  <a class="wrow__link" href={`/work/${slug}/`} aria-label={`${name} — read more`}>
+    <header class="wrow__head">
+      <span class="wrow__index mono">{num}</span>
+      {/* The whitespace before the status span is load-bearing: without a
+          text node between them the heading extracts as "…LayerLIVE" for
+          screen readers and text scrapers, even though the margin separates
+          them visually. */}
+      <h3 class="wrow__name">
+        {name}{' '}<span class="wrow__status">{status}</span>
+      </h3>
+      <span class="wrow__control" aria-hidden="true">&rarr;</span>
+    </header>
+
+    <div class="wrow__body">
+      <div class="wrow__block">
+        <span class="wrow__label label">Business problem</span>
+        <p class="wrow__text small">{problem}</p>
+      </div>
+
+      <div class="wrow__block">
+        <span class="wrow__label label">Solution</span>
+        <p class="wrow__text small">{solution}</p>
+      </div>
+
+      {/* Judgment, shown at the point of evidence rather than only inside the
+          case study. A reader who never clicks through still sees that scope
+          was decided, not merely accumulated — which is the one thing this
+          portfolio can show that a feature list cannot. */}
+      {notBuilt && (
+        <div class="wrow__block">
+          <span class="wrow__label label">Deliberately not built</span>
+          <p class="wrow__text wrow__text--muted small">{notBuilt}</p>
+        </div>
+      )}
+    </div>
+
+    <div class="wrow__foot">
+      <ul class="wrow__highlights">
+        {
+          highlights.map((h) => (
+            <li class="wrow__highlight small">
+              <span class="marker" aria-hidden="true" />
+              {h}
+            </li>
+          ))
+        }
+      </ul>
+      <ul class="wrow__stack">
+        {stack.map((s) => <li><Chip label={s} /></li>)}
+      </ul>
+    </div>
+  </a>
+</article>
+
+<style>
+  .wrow {
+    border-block-end: 1px solid var(--rule);
+  }
+
+  .wrow:first-child {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .wrow__link {
+    display: block;
+    padding-block: var(--s-5);
+  }
+
+  /* --- The operational line ---------------------------------------- */
+  .wrow__head {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--s-4);
+  }
+
+  .wrow__index {
+    font-size: var(--t-meta);
+    color: var(--accent);
+  }
+
+  .wrow__name {
+    font-size: var(--t-section);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-title);
+    color: var(--ink);
+    /* Colour and displacement only — no scale, no shadow, no fill. Measured
+       as BrightEdge's entire hover vocabulary. */
+    transition: color var(--dur-1) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
+  }
+
+  /* The qualifier rides the name's baseline rather than sitting under it. */
+  .wrow__status {
+    margin-inline-start: var(--s-4);
+    font-size: var(--t-meta);
+    font-weight: var(--fw-regular);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .wrow__control {
+    font-size: var(--t-lead);
+    color: var(--ink-3);
+    transition: color var(--dur-1) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
+  }
+
+  /* --- Prose: two columns, so full width buys density not line length -- */
+  .wrow__body {
+    display: grid;
+    /* min() guards the track floor: a bare minmax(18rem, …) cannot shrink
+       below 288px, which overflows a 320px viewport once gutters are taken.
+       Measured: 3px overflow at 320 before this. */
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: var(--s-5) var(--s-8);
+    margin-block-start: var(--s-5);
+    padding-inline-start: calc(2.25rem + var(--s-4));
+  }
+
+  .wrow__label {
+    display: block;
+    margin-block-end: var(--s-2);
+  }
+
+  .wrow__text {
+    color: var(--ink-2);
+    max-inline-size: 46ch;
+  }
+
+  /* One step quieter than problem/solution: this block earns its place by
+     being present, not by competing with what was actually built. */
+  .wrow__text--muted {
+    color: var(--ink-3);
+  }
+
+  .wrow__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-6);
+    margin-block-start: var(--s-5);
+    padding-inline-start: calc(2.25rem + var(--s-4));
+  }
+
+  .wrow__highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+  }
+
+  .wrow__highlight {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--ink-2);
+  }
+
+  .wrow__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin-inline-start: auto;
+  }
+
+  /* --- Hover: the whole row responds, the name leads ----------------- */
+  .wrow__link:hover .wrow__name,
+  .wrow__link:focus-visible .wrow__name {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .wrow__link:hover .wrow__control,
+  .wrow__link:focus-visible .wrow__control {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wrow__name,
+    .wrow__control {
+      transition: color var(--dur-1) var(--ease-out);
+    }
+
+    .wrow__link:hover .wrow__name,
+    .wrow__link:focus-visible .wrow__name,
+    .wrow__link:hover .wrow__control,
+    .wrow__link:focus-visible .wrow__control {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .wrow__body,
+    .wrow__foot {
+      padding-inline-start: 0;
+    }
+
+    .wrow__stack {
+      margin-inline-start: 0;
+    }
+  }
+</style>

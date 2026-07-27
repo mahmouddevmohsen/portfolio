@@ -1,0 +1,470 @@
+---
+import { getCollection } from 'astro:content'
+import Base from '../layouts/Base.astro'
+import SectionHead from '../components/SectionHead.astro'
+import ProjectCard from '../components/ProjectCard.astro'
+import Chip from '../components/Chip.astro'
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+)
+
+const howIWork = [
+  'I start with the business process, not the technology.',
+  'I verify assumptions before building.',
+  'I prefer simple systems over complex ones.',
+  'I build solutions that someone else can maintain without me.',
+  'Some processes shouldn’t be automated.',
+]
+
+/* Capabilities — what I can be engaged to build, stated as capabilities
+   rather than a skill list. Eight, not ten: eight divides evenly by the
+   4 / 2 / 1 column counts below, so an empty cell (which renders as a grey
+   slab, see .tiles) can never occur at any width. */
+const capabilities = [
+  'AI Automation',
+  'AI Agents',
+  'Internal Tools',
+  'Business Systems',
+  'Web Applications',
+  'Frontend Development',
+  'API Integrations',
+  'Workflow Automation',
+]
+
+/* Stack — what I USE. Capabilities above answer what I BUILD; the two
+   sections must not restate each other, so every capability-shaped entry
+   (AI Automation, AI Agents, Workflow Automation, Internal Tools,
+   Dashboards, Admin Panels, Business Platforms) was removed from here and
+   now lives solely in `capabilities`.
+
+   Every entry is either named in a real project's stack in
+   src/content/projects/*.md, or was already claimed here. Nothing was
+   invented to fill a category. */
+const stack = [
+  {
+    category: 'Languages & Frameworks',
+    items: [
+      'Python',
+      'TypeScript',
+      'React',
+      'Next.js',
+      'Astro',
+      'Node.js',
+      'FastAPI',
+      'Tailwind CSS',
+    ],
+  },
+  {
+    category: 'AI & LLMs',
+    items: [
+      'Claude',
+      'Gemini',
+      'Ollama',
+      'LLM Integration',
+      'Prompt Engineering',
+    ],
+  },
+  {
+    category: 'Data & Backend',
+    items: [
+      'PostgreSQL',
+      'SQL Server',
+      'Supabase',
+      'Firebase',
+      'REST APIs',
+      'Database Design',
+    ],
+  },
+  {
+    category: 'Automation & Tooling',
+    items: ['n8n', 'Docker', 'Playwright', 'Vite', 'Git & GitHub', 'Figma'],
+  },
+]
+---
+
+<Base
+  title="Mahmoud Mohsen — I design systems for businesses that don't have an engineering team"
+  description="Automation, internal tools, AI agents, and business platforms — built around how the work actually happens."
+>
+  {/* ---------------------------------------------------------------- HERO */}
+  <section class="section section--tight">
+    <div class="shell section__inner hero">
+      {/* Identity before positioning. The h1 states what the work is for;
+          without this line the person behind it stays invisible until the
+          About section, ~4000px down. Kept at meta scale and ink-3 so it
+          introduces rather than competes — the h1 remains the loudest
+          element on the screen. */}
+      <p class="hero__id meta" data-reveal>
+        Mahmoud Mohsen &mdash; 22-year-old builder focused on AI systems and automation.
+      </p>
+
+      <h1 class="hero__statement display" data-reveal>
+        I design systems for businesses that don&rsquo;t have an engineering team.
+      </h1>
+
+      <p class="hero__sub lead" data-reveal style="--reveal-delay:120ms">
+        Automation, internal tools, AI agents, and business platforms&mdash;<span class="dim">built around how the work actually happens.</span>
+      </p>
+
+      <div class="hero__actions" data-reveal style="--reveal-delay:180ms">
+        <a class="btn btn--primary on-invert" href="#work">Selected Work</a>
+        <a class="btn" href="#contact">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------------- INTRO */}
+  <section class="section">
+    <div class="shell section__inner">
+      <SectionHead index="01" label="Intro" />
+      <div class="intro">
+        <p class="intro__statement section-title" data-reveal>
+          Most businesses don&rsquo;t need more software.
+          <span class="dim">They need better systems.</span>
+        </p>
+        <p class="intro__body lead measure" data-reveal style="--reveal-delay:60ms">
+          I build practical solutions that reduce repetitive work, improve
+          operations, and help teams spend less time managing processes and
+          more time running their business.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ------------------------------------------------------- SELECTED WORK */}
+  <section id="work" class="section">
+    <div class="shell section__inner">
+      <SectionHead index="02" label="Selected work" aside={`${projects.length} systems`} />
+      {/* Full-width rows, not a 2-up grid: the grid forced every multi-word
+          project name onto two lines. See ProjectCard.astro. */}
+      <div class="work">
+        {
+          projects.map((p, i) => (
+            <ProjectCard
+              index={i + 1}
+              slug={p.id}
+              name={p.data.name}
+              status={p.data.status}
+              problem={p.data.problem}
+              solution={p.data.solution}
+              notBuilt={p.data.study?.spread.notBuilt}
+              highlights={p.data.highlights}
+              stack={p.data.stack}
+            />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------- HOW I WORK */}
+  <section id="approach" class="section">
+    <div class="shell section__inner">
+      <SectionHead index="03" label="How I work" />
+      <ol class="rows" data-assemble data-reveal>
+        {
+          howIWork.map((line, i) => (
+            <li class="row" data-step>
+              <span class="row__index mono">{String(i + 1).padStart(2, '0')}</span>
+              <p class="row__text subtitle">{line}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------------- ABOUT */}
+  <section id="about" class="section">
+    <div class="shell section__inner">
+      <SectionHead index="04" label="About" />
+      <div class="cols cols--split">
+        <span class="about__side" aria-hidden="true"></span>
+        <div class="about__body measure prose" data-reveal>
+          <p class="lead ink">
+            I&rsquo;m Mahmoud Mohsen, 22, a graduate of the Faculty of
+            Physical Education. I build AI-powered systems and automation
+            for businesses.
+          </p>
+          <p class="body">
+            AI is a long-term interest, not a recent one. My focus is
+            narrower than the field itself: using it to solve business
+            problems through automation, internal tools, and practical
+            software.
+          </p>
+          <p class="body">
+            That experience comes from working directly with local clients
+            rather than companies&mdash;understanding how an operation
+            actually runs, then building the system it needs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* -------------------------------------------------------- CAPABILITIES */}
+  {/* Last section before the contact block, deliberately: it introduces
+      almost nothing new, so its job is not to inform but to restate the
+      engageable work at the moment of decision. */}
+  <section class="section">
+    <div class="shell section__inner">
+      <SectionHead index="05" label="Capabilities" aside="What I build" />
+      {/* Indexed capability register, not a tag cloud. Each entry gets an
+          index and room of its own so the block reads as an enumerated set of
+          things I do, rather than a keyword list — which is what the
+          positioning explicitly rules out. Structure carries the distinction;
+          no descriptive copy has been invented to prop it up. */}
+      <ol class="tiles" data-assemble data-reveal>
+        {
+          capabilities.map((item, i) => (
+            <li class="tile" data-step>
+              <span class="tile__index mono">{String(i + 1).padStart(2, '0')}</span>
+              <span class="tile__text">{item}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------------- STACK */}
+  {/* APPENDIX — rendered after the contact block via Base's `appendix` slot.
+      The audience is founders, for whom a technology list is the least
+      relevant content on the page; it must not occupy the pre-CTA slot.
+
+      An <aside> rather than a <section> because content placed after
+      </footer> would otherwise sit outside every landmark, and a screen
+      reader user navigating by landmark would never reach it. `aside` is a
+      complementary landmark and is the correct semantics for an appendix. */}
+  <aside slot="appendix" class="section appendix" aria-label="Stack — what I use">
+    <div class="shell section__inner">
+      <SectionHead index="06" label="Stack" aside="What I use" />
+      <ul class="cols cols--2 stack" data-assemble data-reveal>
+        {
+          stack.map((group) => (
+            <li class="stack__group panel" data-step>
+              <span class="stack__label label">{group.category}</span>
+              <ul class="stack__chips">
+                {group.items.map((item) => (
+                  <li>
+                    <Chip label={item} />
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </aside>
+</Base>
+
+<style>
+  /* --- Hero: dense and confident, not atmospheric --------------------- */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-4);
+    padding-block: var(--s-7) var(--s-8);
+  }
+
+  /* Sits tight to the statement it introduces: the flex gap alone reads as a
+     separate block rather than an eyebrow belonging to the headline. */
+  .hero__id {
+    margin-block-end: calc(var(--s-4) * -0.5);
+    max-inline-size: 76ch;
+  }
+
+  /* Wide measure on purpose: three lines, not five. The statement must sit
+     above the fold together with the sub-line and both actions, so that the
+     first screen already offers a route to proof. */
+  .hero__statement {
+    max-inline-size: 26ch;
+  }
+
+  .hero__sub {
+    max-inline-size: 52ch;
+    margin-block-start: var(--s-2);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-block-start: var(--s-3);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-5);
+    border: 1px solid var(--rule-ink);
+    font-size: var(--t-meta);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.02em;
+    transition: background-color var(--dur-1) var(--ease),
+      color var(--dur-1) var(--ease);
+  }
+
+  .btn:hover,
+  .btn:focus-visible {
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+  }
+
+  .btn--primary {
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+  }
+
+  .btn--primary:hover,
+  .btn--primary:focus-visible {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* --- Intro ----------------------------------------------------------- */
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--s-8);
+    align-items: start;
+  }
+
+  .intro__statement {
+    max-inline-size: 18ch;
+  }
+
+  /* --- Numbered rows: BrightEdge's strongest component, re-derived ----- */
+  .rows {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--s-4);
+    align-items: baseline;
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--rule);
+    transition: background-color var(--dur-1) var(--ease);
+  }
+
+  .row:hover {
+    background: var(--accent-quiet);
+  }
+
+  .row__index {
+    font-size: var(--t-meta);
+    color: var(--accent);
+  }
+
+  .row__text {
+    max-inline-size: 52ch;
+  }
+
+  /* --- Tiles ------------------------------------------------------------ */
+  /* Explicit column counts, not auto-fill. The 1px gap over a rule-coloured
+     background is what draws the hairlines — which means any cell the items
+     don't fill renders as a grey slab. With eight items, 4 / 2 / 1 columns all
+     divide evenly, so an empty cell can never occur at any width. */
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    background: var(--canvas);
+    padding: var(--s-5);
+    min-block-size: 7rem;
+    transition: background-color var(--dur-1) var(--ease);
+  }
+
+  .tile:hover {
+    background: var(--canvas-panel);
+  }
+
+  .tile__index {
+    font-size: var(--t-micro);
+    color: var(--accent);
+  }
+
+  .tile__text {
+    margin-block-start: auto;
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-title);
+  }
+
+  /* The appendix lives outside <main>, where the global
+     `.section:first-of-type` reset (layout.css) accidentally matches it —
+     `:first-of-type` is per element TYPE, and this is the only <aside> in
+     the document, so it was stripped of the hairline every other section
+     boundary carries. Restored here rather than by loosening the global
+     rule, which would also add a hairline above the footer and change a
+     boundary this pass was not asked to touch. */
+  .section.appendix {
+    border-block-start: 1px solid var(--rule);
+  }
+
+  /* --- Stack -------------------------------------------------------------
+     A 2-up panel grid — four groups divide it evenly, so no orphan-spanning
+     hack is needed. Chips reuse the `tag`
+     variant already used for project stack tags: borderless, canvas-sunk,
+     never mono. No ratings, no bars — a label is either listed or it isn't. */
+  .stack__group {
+    padding: var(--s-6);
+  }
+
+  .stack__label {
+    display: block;
+    margin-block-end: var(--s-4);
+  }
+
+  .stack__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+
+  /* --- About ------------------------------------------------------------
+     The margin slot previously repeated the name — its fourth appearance on
+     one page, directly under a section head already reading ABOUT. It is now
+     an empty structural column that preserves the split rhythm shared with
+     the project pages without restating anything. */
+  .about__side {
+    display: block;
+  }
+
+  @media (max-width: 72rem) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 56rem) {
+    .intro {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+    .row {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .tiles {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

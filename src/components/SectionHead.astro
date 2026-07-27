@@ -1,0 +1,22 @@
+---
+/* SECTION HEAD — index, label, trailing rule.
+
+   Elias's `#projects ————` motif, re-derived: the numbered index and the
+   rule that runs to the margin survive because they organise; the hashtag
+   glyph and the One Dark palette do not, because they are its signature. */
+
+interface Props {
+  index: string
+  label: string
+  aside?: string
+}
+
+const { index, label, aside } = Astro.props
+---
+
+<div class="head">
+  <span class="head__index mono">{index}</span>
+  <h2 class="head__label">{label}</h2>
+  <span class="head__rule"></span>
+  {aside && <span class="head__aside">{aside}</span>}
+</div>

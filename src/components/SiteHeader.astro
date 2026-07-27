@@ -1,0 +1,79 @@
+---
+/* TOP BAR.
+
+   Sticky, and revealed on scroll-up rather than pinned. Pinned chrome eats
+   vertical space on every screen and starts to feel like an application;
+   scrolling away entirely — the previous behaviour — left a reader on a long
+   page with no route back to navigation without returning to the top. Reveal
+   on scroll-up costs nothing while reading and restores the route instantly.
+
+   It never overlays content: it occupies its own band and translates out of
+   view, so nothing is ever hidden beneath it.
+
+   The name is suppressed while the rail is visible. The rail owns identity on
+   desktop; the bar owns it only once the rail is gone. One statement of
+   identity per viewport. */
+import Nav from './Nav.astro'
+---
+
+<header class="bar" data-bar>
+  <div class="shell bar__inner">
+    <a class="bar__home" href="/">
+      <span class="bar__name">Mahmoud Mohsen</span>
+      <span class="bar__role meta">Business systems</span>
+    </a>
+    <Nav />
+  </div>
+</header>
+
+<style>
+  .bar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 30;
+    background: var(--canvas);
+    border-block-end: 1px solid var(--rule);
+    transition: transform var(--dur-2) var(--ease);
+  }
+
+  .bar[data-hidden='true'] {
+    transform: translateY(-101%);
+  }
+
+  .bar__inner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-5);
+    padding-block: var(--s-4);
+  }
+
+  .bar__home {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+  }
+
+  .bar__name {
+    font-size: var(--t-meta);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+  }
+
+  /* The rail carries the name above this width, so the bar stays quiet. */
+  @media (min-width: 64.0625rem) {
+    .bar__name {
+      display: none;
+    }
+    .bar__role {
+      color: var(--ink-2);
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .bar__role {
+      display: none;
+    }
+  }
+</style>

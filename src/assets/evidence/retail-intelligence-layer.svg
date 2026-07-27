@@ -1,0 +1,96 @@
+<svg
+  class="dg"
+  viewBox="0 -14 1180 314"
+  role="img"
+  aria-labelledby="dg-ril-title dg-ril-desc"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title id="dg-ril-title">Retail Intelligence Layer — monitoring architecture</title>
+  <desc id="dg-ril-desc">
+    Operational data flows one way from a legacy SQL Server POS database on the
+    client site, through a read-only adapter layer, across a boundary to the
+    owner's VPS, where an incremental synchronization service feeds a secure
+    cloud API. The API serves both a central operational dashboard and
+    automated WhatsApp reporting. No path writes back to the client system.
+  </desc>
+
+  <!-- zones, sized to hug their contents -->
+  <g class="dg-zone">
+    <rect x="8" y="52" width="432" height="112" />
+    <text class="dg-zone-label" x="20" y="42">Client systems</text>
+  </g>
+  <g class="dg-zone">
+    <rect x="496" y="16" width="676" height="264" />
+    <text class="dg-zone-label" x="508" y="6">Centralized platform</text>
+  </g>
+
+  <!-- connectors -->
+  <g class="dg-line">
+    <path d="M214 108 H234" marker-end="url(#dg-arrow)" />
+    <path d="M428 108 H516" marker-end="url(#dg-arrow)" />
+    <path d="M710 108 H730" marker-end="url(#dg-arrow)" />
+    <path d="M924 108 H936 V68 H944" marker-end="url(#dg-arrow)" />
+    <path d="M924 108 H936 V212 H944" marker-end="url(#dg-arrow)" />
+  </g>
+
+  <!-- boundary annotation: sits in the clear band below zone A, left of zone B -->
+  <text class="dg-note" x="468" y="188" text-anchor="middle">read-only,</text>
+  <text class="dg-note" x="468" y="203" text-anchor="middle">no write access</text>
+
+  <!-- nodes -->
+  <g class="dg-node">
+    <rect x="24" y="76" width="190" height="64" />
+    <text class="dg-idx" x="36" y="98">01</text>
+    <text class="dg-label" x="36" y="118">Legacy SQL Server</text>
+    <text class="dg-label" x="36" y="133">POS database</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="238" y="76" width="190" height="64" />
+    <text class="dg-idx" x="250" y="98">02</text>
+    <text class="dg-label" x="250" y="118">Read-only</text>
+    <text class="dg-label" x="250" y="133">adapter layer</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="520" y="76" width="190" height="64" />
+    <text class="dg-idx" x="532" y="98">03</text>
+    <text class="dg-label" x="532" y="118">Incremental</text>
+    <text class="dg-label" x="532" y="133">synchronization</text>
+  </g>
+
+  <g class="dg-node">
+    <rect x="734" y="76" width="190" height="64" />
+    <text class="dg-idx" x="746" y="98">04</text>
+    <text class="dg-label" x="746" y="118">Secure</text>
+    <text class="dg-label" x="746" y="133">cloud API</text>
+  </g>
+
+  <g class="dg-node dg-node--out">
+    <rect x="944" y="36" width="204" height="64" />
+    <text class="dg-idx" x="956" y="58">05</text>
+    <text class="dg-label" x="956" y="78">Central operational</text>
+    <text class="dg-label" x="956" y="93">dashboard</text>
+  </g>
+
+  <g class="dg-node dg-node--out">
+    <rect x="944" y="180" width="204" height="64" />
+    <text class="dg-idx" x="956" y="202">06</text>
+    <text class="dg-label" x="956" y="222">Automated</text>
+    <text class="dg-label" x="956" y="237">WhatsApp reporting</text>
+  </g>
+
+  <defs>
+    <marker
+      id="dg-arrow"
+      viewBox="0 0 8 8"
+      refX="7"
+      refY="4"
+      markerWidth="8"
+      markerHeight="8"
+      orient="auto-start-reverse"
+    >
+      <path class="dg-arrowhead" d="M0 1 L7 4 L0 7 Z" />
+    </marker>
+  </defs>
+</svg>
