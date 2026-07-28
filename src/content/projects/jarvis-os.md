@@ -1,7 +1,7 @@
 ---
 order: 2
 name: JARVIS OS
-status: Personal
+status: Internal Product
 problem: >-
   Modern AI assistants can answer questions but cannot reliably operate a computer. Most automation systems assume success instead of verifying it, making them unsuitable for operational workflows where execution integrity matters.
 solution: >-

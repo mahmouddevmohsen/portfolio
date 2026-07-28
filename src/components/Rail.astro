@@ -16,14 +16,16 @@
    Fixed, never overlapping: the document is inset past it via body padding —
    the correction to Carl Etkinson's nav, which was captured obscuring its own
    headline on the live site. */
+
+import { SITE } from '../config/site'
 ---
 
 <div class="rail">
-  <a class="rail__mark" href="/" aria-label="Mahmoud Mohsen — home">
+  <a class="rail__mark" href="/" aria-label={`${SITE.name} — home`}>
     <span class="rail__glyph" aria-hidden="true"></span>
   </a>
 
-  <span class="rail__wordmark">Mahmoud Mohsen</span>
+  <span class="rail__wordmark">{SITE.name}</span>
 
   <span class="rail__foot" aria-hidden="true"></span>
 </div>

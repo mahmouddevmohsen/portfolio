@@ -128,12 +128,57 @@ const projects = defineCollection({
       /* --- Preview: required on every project --------------------- */
       order: z.number().int().positive(),
       name: z.string().trim().min(1),
-      /** Closed vocabulary. No invented states, no upgrading a pilot. */
-      status: z.enum(['Live', 'Pilot', 'Ongoing', 'Personal']),
+      /** Closed vocabulary. No invented states, no upgrading a pilot.
+          The enum is the single definition of the vocabulary: renaming a
+          state here fails the build on every project still carrying the old
+          label, which is what stops the two drifting apart. */
+      status: z.enum([
+        'In Production',
+        'Pilot',
+        'Internal Product',
+        'Active Development',
+      ]),
       problem: z.string().trim().min(30),
       solution: z.string().trim().min(30),
       highlights: z.array(z.string().trim().min(1)).min(1).max(6),
       stack: z.array(z.string().trim().min(1)).min(1).max(6),
+
+      /* --- Outcome: optional, and silent when absent ---------------
+         Label/value pairs stating what the system does in operation. Optional
+         because a project without measured numbers must be able to say
+         nothing rather than say something invented — the same rule the claim
+         ledger enforces for the study. A project omitting the field renders
+         no Outcome section at all. */
+      outcome: z
+        .array(
+          z.object({
+            label: z.string().trim().min(1),
+            value: z.string().trim().min(1),
+          })
+        )
+        .optional(),
+
+      /* --- Gallery: optional screenshots ---------------------------
+         Paths are site-absolute and resolved from `public/`, e.g.
+         `/screenshots/<slug>-1.jpg`. This is the owner-supplied raster path;
+         the build-time `shots` glob in the project page reads authored
+         captures from src/assets instead, and the two do not collide.
+
+         `width` and `height` are the image's intrinsic pixel dimensions.
+         They are optional only because a caller may not have them to hand —
+         supplying them is what removes layout shift, so the renderer falls
+         back to a reserved aspect box when they are absent. */
+      gallery: z
+        .array(
+          z.object({
+            src: z.string().trim().min(1),
+            alt: z.string().trim().min(1),
+            caption: z.string().trim().min(1),
+            width: z.number().int().positive().optional(),
+            height: z.number().int().positive().optional(),
+          })
+        )
+        .optional(),
 
       /* --- Study: gated ------------------------------------------- */
       /** True while the project is a skeleton. Setting it false asserts the

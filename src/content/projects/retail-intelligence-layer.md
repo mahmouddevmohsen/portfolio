@@ -1,7 +1,7 @@
 ---
 order: 1
 name: Retail Intelligence Layer
-status: Live
+status: In Production
 problem: >-
   Retail businesses rely on legacy POS systems that lock operational data inside desktop software. Owners lose visibility as soon as they leave the store, making inventory, sales, and staff activity difficult to monitor remotely.
 solution: >-
@@ -20,6 +20,29 @@ stack:
   - PostgreSQL
   - Supabase
   - n8n
+
+# Operational facts, stated once they are measured. Every TODO below is a
+# placeholder for a real figure — leave it as TODO rather than estimating:
+# an invented number is the one failure this record cannot recover from.
+outcome:
+  - label: "Sync interval"
+    value: "TODO"
+  - label: "Records synchronized daily"
+    value: "TODO"
+  - label: "Manual reporting time saved"
+    value: "TODO"
+  - label: "Uptime since launch"
+    value: "TODO"
+  - label: "Staff retraining required"
+    value: "None"
+
+# Screenshots of the running system. Files live in public/screenshots/ and are
+# referenced site-absolute, e.g. /screenshots/retail-intelligence-layer-1.jpg.
+# Each entry takes src, alt and caption; add the image's intrinsic width and
+# height in pixels as well, which is what removes layout shift on load.
+# Empty means the section is not rendered at all.
+gallery: []
+
 studyPending: false
 study:
   oneLine: >-

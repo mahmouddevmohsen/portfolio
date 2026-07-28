@@ -14,12 +14,13 @@
    desktop; the bar owns it only once the rail is gone. One statement of
    identity per viewport. */
 import Nav from './Nav.astro'
+import { SITE } from '../config/site'
 ---
 
 <header class="bar" data-bar>
   <div class="shell bar__inner">
     <a class="bar__home" href="/">
-      <span class="bar__name">Mahmoud Mohsen</span>
+      <span class="bar__name">{SITE.name}</span>
       <span class="bar__role meta">Business systems</span>
     </a>
     <Nav />

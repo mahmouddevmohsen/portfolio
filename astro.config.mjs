@@ -3,29 +3,17 @@ import { defineConfig } from 'astro/config'
 
 import sitemap from '@astrojs/sitemap';
 
-// Static output. This is a document, not an application — nothing here needs
-// a server at runtime.
-/* Canonical origin, resolved at build time.
+import { SITE } from './src/config/site.ts'
+
+/* Canonical origin — the origin THIS build is served from.
  *
- * Every canonical URL, Open Graph tag and sitemap entry derives from this, so
- * a wrong value is worse than an obviously-broken one: a real-but-incorrect
- * domain gets silently indexed, while an unresolvable one fails loudly.
- *
- * Resolution order:
- *   1. SITE_URL                        — set this once a real domain exists.
- *   2. VERCEL_PROJECT_PRODUCTION_URL   — injected by Vercel; the stable
- *      production hostname, not the per-deployment preview URL, so canonicals
- *      stay constant across deploys.
- *   3. `.invalid`                      — reserved by RFC 2606 and guaranteed
- *      never to resolve for anyone. Deliberately NOT a plausible-looking
- *      placeholder such as `my-portfolio.vercel.app`: those subdomains are
- *      claimable, so a guessed one can point at a stranger's live site.
+ * Resolved in src/config/site.ts from the build environment: a preview
+ * deployment resolves to its own hostname, production and local builds to the
+ * production domain. Everything derived from `Astro.site` therefore describes
+ * the document the reader actually loaded, which is what a canonical is for.
+ * Changing the domain remains a one-line edit in the config.
  */
-const site =
-  process.env.SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'https://set-production-domain-here.invalid')
+const site = SITE.domain
 
 // Static output. This is a document, not an application — nothing here needs
 // a server at runtime.
@@ -35,5 +23,25 @@ export default defineConfig({
   output: 'static',
   build: { format: 'directory' },
   devToolbar: { enabled: false },
-  integrations: [sitemap()],
+  integrations: [
+    /* The sitemap is a statement about the SITE, not about this build, so
+     * every entry is rewritten to the production origin even when the build
+     * is a preview. A preview sitemap advertising preview URLs would invite a
+     * crawler to index a throwaway deployment; one that names the production
+     * URLs is merely redundant, which is the safe failure.
+     *
+     * The integration has no origin option — it derives entries from `site`
+     * above — so the origin is swapped per entry here. A no-op on production,
+     * where the two values are already identical.
+     */
+    sitemap({
+      serialize: (item) => ({
+        ...item,
+        url: new URL(
+          new URL(item.url).pathname,
+          SITE.productionDomain
+        ).href,
+      }),
+    }),
+  ],
 })

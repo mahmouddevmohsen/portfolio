@@ -98,11 +98,29 @@ p a:hover,
   outline-offset: var(--focus-offset);
 }
 
-/* Any control sitting on the inverted surface flips the ring to the canvas
-   colour, which holds ~15:1 against near-black. Apply alongside a dark
-   background rather than writing a bespoke focus rule per component. */
+/* Focus ring for controls whose own surface is inverted (the hero primary
+   action, the footer email link).
+
+   The ring is NOT drawn on the control. `--focus-offset: 3px` places the
+   outline outside the border box, so it is painted on whatever sits behind
+   the control — which for both of these is the page canvas. The colour must
+   therefore contrast with --canvas, not with the control's inverted fill.
+
+   This is what the previous value got wrong: `--focus-color: var(--canvas)`
+   made the ring exactly the colour of the surface it lands on — 1.00:1, an
+   invisible focus indicator, in BOTH schemes rather than only in dark. The
+   error was easy to miss because the reasoning behind it ("light ring on a
+   near-black button") describes the control's fill, which the ring never
+   touches.
+
+   --canvas-invert is by definition the maximum contrast available against
+   --canvas, and it inverts with the scheme, so one unconditional declaration
+   is correct in both: measured 17.05:1 in light and 16.97:1 in dark.
+
+   Note that :focus-visible also swaps these controls' own fill to --accent.
+   That changes nothing here — the ring is outside the fill either way. */
 .on-invert {
-  --focus-color: var(--canvas);
+  --focus-color: var(--canvas-invert);
 }
 
 p {

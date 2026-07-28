@@ -1,7 +1,7 @@
 ---
 order: 3
 name: Business Automation Engine
-status: Ongoing
+status: Active Development
 problem: >-
   Growing businesses often rely on disconnected tools such as WhatsApp, Gmail, spreadsheets, and manual processes. Employees become the integration layer, wasting time moving information between systems.
 solution: >-

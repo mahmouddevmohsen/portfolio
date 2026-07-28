@@ -1,7 +1,7 @@
 ---
 order: 4
 name: Commerce Hub
-status: Personal
+status: Active Development
 problem: >-
   Many retail businesses manage online sales using disconnected tools that separate storefront management from operational workflows, creating unnecessary manual work.
 solution: >-
@@ -20,6 +20,33 @@ stack:
   - Responsive Architecture
   - Dashboard Design System
   - WhatsApp Integration
+
+# Captures of the running admin panel. Ordered deliberately: the content
+# editor leads because its live-preview panel is the only frame that shows
+# the owner changing the storefront and seeing the result, which is the
+# platform's actual argument.
+#
+# Every account identifier and contact number in these frames was redacted
+# destructively before the files were written — the pixels are overwritten,
+# not covered. width/height are the processed files' real dimensions and are
+# what keep the Gallery from shifting layout as the images decode.
+gallery:
+  - src: "/screenshots/commerce-hub-content.png"
+    alt: "Store content editor with a live preview panel alongside the form"
+    caption: "The owner edits store copy and sees the result immediately — no deploy, no developer."
+    width: 917
+    height: 639
+  - src: "/screenshots/commerce-hub-categories.png"
+    alt: "Category management showing seven categories with product counts"
+    caption: "Categories are reordered by drag; changes save without a confirm step."
+    width: 1358
+    height: 634
+  - src: "/screenshots/commerce-hub-products.png"
+    alt: "Product catalogue listing 205 items with pricing and discounts"
+    caption: "205 products, priced and discounted by the owner directly."
+    width: 1359
+    height: 601
+
 studyPending: false
 study:
   oneLine: >-

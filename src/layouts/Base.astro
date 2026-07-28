@@ -7,6 +7,7 @@ import '../styles/motion.css'
 import Rail from '../components/Rail.astro'
 import SiteHeader from '../components/SiteHeader.astro'
 import SiteFooter from '../components/SiteFooter.astro'
+import { SITE } from '../config/site'
 
 interface Props {
   title: string
@@ -21,16 +22,43 @@ const { title, description, type = 'website', noindex = false } = Astro.props
 
 /* Canonical + absolute OG URLs.
 
-   `Astro.site` is deliberately a reserved `.invalid` domain until a real one
-   is set (see astro.config.mjs). That is the intended failure mode: an
-   obviously-broken canonical is recoverable, a silently-wrong one that gets
-   indexed is not. Setting `site` fixes every URL below at once. */
+   `Astro.site` is the RESOLVED origin (see astro.config.mjs): on a preview
+   deployment it is that preview's own hostname. Canonical, og:url and og:image
+   all describe the document the reader actually loaded, so they must follow
+   the build — a preview claiming the production URL as its canonical tells a
+   crawler the throwaway build is the authoritative copy of the site.
+
+   The JSON-LD `url` below deliberately does NOT follow it; see there. */
 const canonical = new URL(Astro.url.pathname, Astro.site).href
 
 /* Absolute, because crawlers do not resolve relative OG image paths. Shares
    `Astro.site`, so setting the production domain fixes this URL at the same
    moment it fixes every canonical. */
 const ogImage = new URL('/og.png', Astro.site).href
+
+/* JSON-LD Person — the machine-readable identity record.
+
+   Sourced entirely from the config, so it cannot drift from what the page
+   says. `sameAs` is the profile-identity claim, and it follows `showGithub`:
+   the flag reads "hide the link everywhere", and a structured-data entry a
+   crawler consumes is not an exception to everywhere.
+
+   `url` is the PRODUCTION origin, not the resolved one. This is an identity
+   record — it states where this person is found on the web, which is a fact
+   about the person and not about the deployment rendering it. A preview build
+   asserting its own hostname as someone's identity URL would be simply wrong.
+
+   Omitted on noindex pages. A Person record attached to a 404 is not wrong,
+   but it is a claim made from a page that exists to say nothing is here. */
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  jobTitle: SITE.jobTitle,
+  url: SITE.productionDomain,
+  email: `mailto:${SITE.email}`,
+  ...(SITE.showGithub ? { sameAs: [SITE.githubUrl] } : {}),
+}
 ---
 
 <!doctype html>
@@ -40,7 +68,10 @@ const ogImage = new URL('/og.png', Astro.site).href
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="color-scheme" content="light" />
+    {/* Both schemes are supported and OS-driven. This is what lets the UA
+        pick dark form controls, scrollbars and the <dialog> backdrop default
+        to match, rather than painting light chrome over a dark document. */}
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     {/* The one font file, on the critical path. Preloaded so it is fetched in
         parallel with the stylesheet rather than after it — without this the
@@ -59,7 +90,7 @@ const ogImage = new URL('/og.png', Astro.site).href
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="Mahmoud Mohsen" />
+    <meta property="og:site_name" content={SITE.name} />
     <meta property="og:locale" content="en" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
@@ -73,6 +104,16 @@ const ogImage = new URL('/og.png', Astro.site).href
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    {
+      !noindex && (
+        <script
+          type="application/ld+json"
+          is:inline
+          set:html={JSON.stringify(person)}
+        />
+      )
+    }
+
     <script is:inline>
       document.documentElement.classList.add('js')
     </script>

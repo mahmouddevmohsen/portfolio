@@ -5,6 +5,8 @@ import type { GetStaticPaths } from 'astro'
 import Base from '../../layouts/Base.astro'
 import Chip from '../../components/Chip.astro'
 import SectionHead from '../../components/SectionHead.astro'
+import Gallery from '../../components/Gallery.astro'
+import Outcome from '../../components/Outcome.astro'
 import { Image } from 'astro:assets'
 
 /* PROJECT PAGE — renders the full Authoring Record when one exists.
@@ -263,6 +265,11 @@ const facts: { term: string; value: string }[] = study
           <div class="evidence">
             <p class="lead measure ink" data-reveal>{study.evidence.shows}</p>
 
+            {/* Owner-supplied captures come before the diagram: the running
+                system first, then the abstraction of it. Renders nothing
+                unless the project declares a `gallery`. */}
+            <Gallery images={p.gallery} />
+
             {diagram && (
               <figure class="evidence__figure" data-reveal>
                 {/* Scrolls rather than shrinking: below ~640px a scaled-down
@@ -327,6 +334,11 @@ const facts: { term: string; value: string }[] = study
       </section>
     )
   }
+
+  {/* Immediately after the evidence, before the technical line: what the
+      system does in operation belongs with the proof of it, not with the
+      substrate. Renders nothing unless the project declares an `outcome`. */}
+  <Outcome items={p.outcome} />
 
   {
     study && (

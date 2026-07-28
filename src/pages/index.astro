@@ -9,12 +9,26 @@ const projects = (await getCollection('projects')).sort(
   (a, b) => a.data.order - b.data.order
 )
 
+/* How I work — method. What I do on an engagement, in order.
+   "Some processes shouldn't be automated" moved OUT of this list and into
+   `beliefs` below: it is a position held, not a step taken, and mixing the
+   two made the list read as four practices plus a caveat. */
 const howIWork = [
   'I start with the business process, not the technology.',
   'I verify assumptions before building.',
   'I prefer simple systems over complex ones.',
   'I build solutions that someone else can maintain without me.',
-  'Some processes shouldn’t be automated.',
+]
+
+/* Beliefs — position, not method. Placed last before the contact block, where
+   the reader has already seen the work and is deciding whether the judgment
+   behind it is one they want. Stated as claims that can be disagreed with:
+   a belief nobody could argue against is a slogan. */
+const beliefs = [
+  'The hardest part of automation is deciding what not to automate.',
+  'A system nobody can maintain without me is a system I failed to design.',
+  'Constraints are information, not obstacles.',
+  'I’d rather be corrected early than confident late.',
 ]
 
 /* Capabilities — what I can be engaged to build, stated as capabilities
@@ -183,20 +197,21 @@ const stack = [
         <span class="about__side" aria-hidden="true"></span>
         <div class="about__body measure prose" data-reveal>
           <p class="lead ink">
-            I&rsquo;m Mahmoud Mohsen, 22, a graduate of the Faculty of
-            Physical Education. I build AI-powered systems and automation
-            for businesses.
+            I build AI-powered systems and automation for businesses
+            &mdash; the kind that don&rsquo;t have an engineering team to
+            build them internally.
           </p>
           <p class="body">
-            AI is a long-term interest, not a recent one. My focus is
-            narrower than the field itself: using it to solve business
-            problems through automation, internal tools, and practical
-            software.
+            I came into software from outside it. My degree is in Physical
+            Education; everything technical I know came from building things
+            people actually depend on. That path made me care more about
+            whether a system works inside a real operation than whether it
+            looks elegant on paper.
           </p>
           <p class="body">
-            That experience comes from working directly with local clients
-            rather than companies&mdash;understanding how an operation
-            actually runs, then building the system it needs.
+            Most of my experience comes from working directly with local
+            business owners rather than companies &mdash; sitting inside the
+            operation before writing anything.
           </p>
         </div>
       </div>
@@ -228,6 +243,27 @@ const stack = [
     </div>
   </section>
 
+  {/* ------------------------------------------------------------- BELIEFS */}
+  {/* Reuses the numbered-row component from How I work verbatim. The two
+      lists are the same kind of object — a short enumerated set of claims —
+      and giving the second one its own treatment would imply a distinction
+      that isn't there. */}
+  <section class="section">
+    <div class="shell section__inner">
+      <SectionHead index="06" label="Beliefs" />
+      <ol class="rows" data-assemble data-reveal>
+        {
+          beliefs.map((line, i) => (
+            <li class="row" data-step>
+              <span class="row__index mono">{String(i + 1).padStart(2, '0')}</span>
+              <p class="row__text subtitle">{line}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
   {/* --------------------------------------------------------------- STACK */}
   {/* APPENDIX — rendered after the contact block via Base's `appendix` slot.
       The audience is founders, for whom a technology list is the least
@@ -239,7 +275,7 @@ const stack = [
       complementary landmark and is the correct semantics for an appendix. */}
   <aside slot="appendix" class="section appendix" aria-label="Stack — what I use">
     <div class="shell section__inner">
-      <SectionHead index="06" label="Stack" aside="What I use" />
+      <SectionHead index="07" label="Stack" aside="What I use" />
       <ul class="cols cols--2 stack" data-assemble data-reveal>
         {
           stack.map((group) => (

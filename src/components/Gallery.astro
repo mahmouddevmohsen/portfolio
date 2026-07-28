@@ -1,0 +1,288 @@
+---
+/* GALLERY — owner-supplied screenshots, above the architecture diagram.
+
+   A block inside the Evidence section rather than a section of its own: the
+   captures and the diagram are one evidence set, and splitting them under two
+   heads would argue they are two kinds of proof. It renders directly above
+   the diagram so the reader sees the running system before its abstraction.
+
+   Renders nothing when a project supplies no `gallery`. An empty frame would
+   read as a missing asset, which is worse than no gallery at all.
+
+   Paths are site-absolute and resolved from `public/` (e.g.
+   `/screenshots/<slug>-1.jpg`), so these files are NOT processed by
+   astro:assets — which is precisely why width/height and the reserved aspect
+   box below have to be handled here by hand rather than emitted for us. */
+
+interface GalleryImage {
+  src: string
+  alt: string
+  caption: string
+  /** Intrinsic pixel dimensions. Supplying them removes layout shift outright;
+      without them the reserved aspect box below is the fallback. */
+  width?: number
+  height?: number
+}
+
+interface Props {
+  images?: GalleryImage[]
+}
+
+const { images } = Astro.props
+---
+
+{
+  images && images.length > 0 && (
+    <div class="gallery" data-gallery>
+      <ul class="gallery__grid">
+        {images.map((img) => (
+          <li class="gallery__item">
+            <figure class="gallery__figure">
+              {/* A button, not a clickable div or a bare image: expanding is
+                  an action, and this is the only way it reaches the keyboard
+                  and the accessibility tree without hand-rolled key handling. */}
+              <button
+                type="button"
+                class="gallery__trigger"
+                data-src={img.src}
+                data-alt={img.alt}
+                data-caption={img.caption}
+              >
+                <span class="gallery__frame">
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    width={img.width}
+                    height={img.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+                <span class="gallery__zoom" aria-hidden="true">
+                  Expand
+                </span>
+              </button>
+              <figcaption class="small gallery__caption">
+                {img.caption}
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+
+      {/* One dialog for the whole gallery, populated on open. <dialog> is used
+          rather than a hand-built overlay because showModal() supplies the
+          things a hand-built one always gets wrong: Escape to dismiss, a focus
+          trap, inert background content, and the top layer — no library and no
+          scroll-lock hack. */}
+      <dialog class="lightbox" data-lightbox aria-labelledby="lightbox-caption">
+        <div class="lightbox__inner">
+          <button type="button" class="lightbox__close" data-lightbox-close>
+            Close
+          </button>
+          {/* No `src` attribute at all until one is opened. An empty src=""
+              is NOT inert: the browser resolves it against the document and
+              re-requests the page itself as an image, on every page load and
+              again on every close. The attribute is added and removed. */}
+          <img class="lightbox__img" data-lightbox-img alt="" />
+          <p class="small lightbox__caption" id="lightbox-caption" data-lightbox-caption />
+        </div>
+      </dialog>
+    </div>
+  )
+}
+
+<script>
+  /* Vanilla, no dependency. Guarded on every lookup: this script is bundled
+     for the page, but the gallery only exists on projects that declare one. */
+  const gallery = document.querySelector<HTMLElement>('[data-gallery]')
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]')
+  const img = document.querySelector<HTMLImageElement>('[data-lightbox-img]')
+  const caption = document.querySelector<HTMLElement>('[data-lightbox-caption]')
+  const closeBtn = document.querySelector<HTMLElement>('[data-lightbox-close]')
+
+  if (gallery && dialog && img && caption && closeBtn) {
+    /* Restored explicitly on close. Browsers return focus to the invoker on
+       their own, but only when the dialog is dismissed through a path they
+       own — backdrop clicks are ours, so the guarantee does not extend to
+       them, and a reader would be dropped at the top of the document. */
+    let opener: HTMLElement | null = null
+
+    gallery.querySelectorAll<HTMLElement>('[data-src]').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        opener = trigger
+        img.src = trigger.dataset.src ?? ''
+        img.alt = trigger.dataset.alt ?? ''
+        caption.textContent = trigger.dataset.caption ?? ''
+        dialog.showModal()
+      })
+    })
+
+    const close = () => dialog.close()
+    closeBtn.addEventListener('click', close)
+
+    /* Click outside the content closes. The dialog element itself fills the
+       viewport, so a click landing on IT rather than on .lightbox__inner is
+       by definition a click on the backdrop. */
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) close()
+    })
+
+    dialog.addEventListener('close', () => {
+      /* Dropped so a stale capture is not held in memory, and so the next
+         open cannot flash the previous image before the new one decodes.
+         removeAttribute, never `src = ''` — an empty src resolves against the
+         document and makes the browser re-request the PAGE as an image. */
+      img.removeAttribute('src')
+      img.alt = ''
+      opener?.focus()
+      opener = null
+    })
+  }
+</script>
+
+<style>
+  .gallery__grid {
+    display: grid;
+    /* min() guards the track floor so a 320px viewport cannot overflow — the
+       same failure already measured and fixed on the work rows. */
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: var(--s-5);
+  }
+
+  .gallery__figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .gallery__trigger {
+    display: block;
+    inline-size: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: start;
+    cursor: pointer;
+    position: relative;
+  }
+
+  /* The same square hairline frame the diagrams and authored captures use, so
+     an owner screenshot reads as one evidence set with them, not a third
+     treatment. */
+  .gallery__frame {
+    display: block;
+    border: 1px solid var(--rule);
+    background: var(--canvas-sunk);
+    padding: var(--s-3);
+  }
+
+  /* The reserved box. `aspect-ratio` on the image holds the cell's height
+     before the file arrives whether or not intrinsic dimensions were supplied,
+     so the grid never reflows on load. `cover` is what makes uneven captures
+     sit in an even grid — the full frame is one click away in the lightbox. */
+  .gallery__frame img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    background: var(--canvas-panel);
+  }
+
+  .gallery__zoom {
+    position: absolute;
+    inset-block-start: calc(var(--s-3) + 1px);
+    inset-inline-end: calc(var(--s-3) + 1px);
+    padding: var(--s-1) var(--s-2);
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+    font-size: var(--t-micro);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity var(--dur-1) var(--ease);
+  }
+
+  /* Focus-visible as well as hover: the affordance must be discoverable to a
+     keyboard reader, who never produces a hover state at all. */
+  .gallery__trigger:hover .gallery__zoom,
+  .gallery__trigger:focus-visible .gallery__zoom {
+    opacity: 1;
+  }
+
+  .gallery__caption {
+    color: var(--ink-3);
+  }
+
+  /* --- Lightbox --------------------------------------------------------- */
+  .lightbox {
+    margin: auto;
+    max-inline-size: min(72rem, 92vw);
+    max-block-size: 92vh;
+    padding: 0;
+    border: 1px solid var(--rule-ink);
+    background: var(--canvas-panel);
+    color: var(--ink);
+    overflow: auto;
+  }
+
+  /* Tokenised: a literal rgba() here could not follow the colour scheme.
+     The fallback is not decorative — inheritance into ::backdrop from the
+     originating element is a recent addition, and where it is unsupported the
+     custom property resolves to nothing and the scrim vanishes entirely,
+     leaving the modal floating over a fully legible page. The fallback is the
+     light-scheme value, so the failure mode is a scrim that is slightly too
+     shallow rather than no scrim at all. */
+  .lightbox::backdrop {
+    background: var(--scrim, rgb(20 20 20 / 0.72));
+  }
+
+  .lightbox__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    padding: var(--s-5);
+  }
+
+  .lightbox__img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    max-block-size: 74vh;
+    object-fit: contain;
+    border: 1px solid var(--rule);
+    background: var(--canvas-sunk);
+  }
+
+  .lightbox__caption {
+    color: var(--ink-3);
+    max-inline-size: var(--measure);
+  }
+
+  .lightbox__close {
+    align-self: flex-end;
+    padding: var(--s-2) var(--s-4);
+    border: 1px solid var(--rule-ink);
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: var(--t-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color var(--dur-1) var(--ease),
+      color var(--dur-1) var(--ease);
+  }
+
+  .lightbox__close:hover,
+  .lightbox__close:focus-visible {
+    background: var(--canvas-invert);
+    color: var(--ink-invert);
+  }
+</style>

@@ -2,25 +2,39 @@
 /* CONTACT + FOOTER — one door, audience-agnostic.
    No segmented paths, no competing calls to action. */
 
-/* Email is the action; GitHub is verification. Two links at identical
-   weight made the reader choose, so email leads and GitHub sits beneath it
-   as secondary. */
+import { SITE } from '../config/site'
 
-const email = 'blinkblinkx1@gmail.com'
+/* Email is the action; everything else is secondary. Two links at identical
+   weight made the reader choose, so email leads and the rest sit beneath it. */
 
-/* An entry only renders once it has a real `href`; a null href is skipped
-   rather than shipped as a dead `#` link, which would fail a reader at the
-   exact moment they try to verify.
+const email = SITE.email
 
-   GitHub carries the whole verification load on its own — it is the only
-   channel here a reader can use to check the claims elsewhere on the site
-   without taking anything on trust. Verified HTTP 200 before wiring.
+/* An entry only renders once it has a real `href`; an empty or disabled one
+   is skipped rather than shipped as a dead `#` link, which would fail a
+   reader at the exact moment they try to act.
+
+   Every entry below is config-driven (see src/config/site.ts), so a channel
+   appears the moment its URL exists and disappears the moment it does not.
+   That is deliberately the ONLY way to add one: a hardcoded link here could
+   outlive the account behind it.
+
+   GitHub is the only channel a reader can use to check the claims made
+   elsewhere on the site without taking anything on trust, so hiding it
+   (`showGithub: false`) removes the site's only verification route.
 
    No LinkedIn profile exists, so no LinkedIn entry is declared at all. It is
    absent rather than null-and-hidden: a hidden placeholder invites someone
-   later to fill it with a guess. */
+   later to fill it with a guess.
+
+   The three action channels reuse the secondary link treatment rather than
+   introducing a second button style. They are calls to action, but the footer
+   already has exactly one primary control by design — a row of competing
+   buttons is the segmented-path layout this block was built to avoid. */
 const secondary: { label: string; href: string | null }[] = [
-  { label: 'GitHub', href: 'https://github.com/mahmouddevmohsen' },
+  { label: 'Book a call', href: SITE.calendlyUrl || null },
+  { label: 'WhatsApp', href: SITE.whatsappUrl || null },
+  { label: 'Download CV', href: SITE.cvUrl || null },
+  { label: 'GitHub', href: SITE.showGithub ? SITE.githubUrl : null },
 ]
 const visibleSecondary = secondary.filter(
   (l): l is { label: string; href: string } => Boolean(l.href)
@@ -42,23 +56,29 @@ const year = 2026
           <span>{email}</span>
           <span class="foot__arrow" aria-hidden="true">&rarr;</span>
         </a>
-        <ul class="foot__links">
-          {
-            visibleSecondary.map((l) => (
-              <li class="foot__link-row">
-                <a class="foot__link" href={l.href}>
-                  <span>{l.label}</span>
-                  <span class="foot__arrow" aria-hidden="true">&rarr;</span>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+        {/* The list carries its own top hairline and margin, so an empty one
+            would draw a stray rule under the email with nothing beneath it.
+            With every secondary channel disabled that is the default state,
+            not an edge case — so the list is omitted, not merely emptied. */}
+        {
+          visibleSecondary.length > 0 && (
+            <ul class="foot__links">
+              {visibleSecondary.map((l) => (
+                <li class="foot__link-row">
+                  <a class="foot__link" href={l.href}>
+                    <span>{l.label}</span>
+                    <span class="foot__arrow" aria-hidden="true">&rarr;</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
       </div>
     </div>
 
     <div class="foot__base">
-      <span class="meta">&copy; {year} Mahmoud Mohsen</span>
+      <span class="meta">&copy; {year} {SITE.name}</span>
     </div>
   </div>
 </footer>
