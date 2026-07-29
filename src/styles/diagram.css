@@ -4,7 +4,7 @@
    The assets in src/assets/evidence/ carry NO fill, stroke or style of their
    own. That is deliberate: they are inlined rather than loaded through <img>
    so they inherit the page's typeface and every colour token, which is also
-   what makes them invert with the scheme for free. The consequence is that an
+   what makes them invert with the theme for free. The consequence is that an
    evidence SVG rendered without these rules is a black-on-transparent blob.
 
    This file exists because the diagrams are now rendered in two places — the

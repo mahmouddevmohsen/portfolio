@@ -29,6 +29,13 @@
      does NOT select it — the site has a default, and an OS preference is not
      the same statement as a preference for this document.
 
+     The control stores "dark" explicitly rather than clearing the key. The
+     two are indistinguishable today, since both resolve here — but only until
+     the default moves. Clearing would make "I chose dark" and "I never chose"
+     the same stored state, and every reader who had deliberately picked the
+     old default would be silently switched the day it changed. Writing the
+     choice down is what keeps that reversible.
+
      `color-scheme` is declared so the UA paints scrollbars, form controls and
      the <dialog> backdrop default to match. Without it those stay light while
      everything around them is dark. */

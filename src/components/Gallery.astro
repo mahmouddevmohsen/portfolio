@@ -230,12 +230,12 @@ const { images } = Astro.props
     overflow: auto;
   }
 
-  /* Tokenised: a literal rgba() here could not follow the colour scheme.
+  /* Tokenised: a literal rgba() here could not follow the theme.
      The fallback is not decorative — inheritance into ::backdrop from the
      originating element is a recent addition, and where it is unsupported the
      custom property resolves to nothing and the scrim vanishes entirely,
      leaving the modal floating over a fully legible page. The fallback is the
-     light-scheme value, so the failure mode is a scrim that is slightly too
+     light-theme value, so the failure mode is a scrim that is slightly too
      shallow rather than no scrim at all. */
   .lightbox::backdrop {
     background: var(--scrim, rgb(20 20 20 / 0.72));

@@ -108,13 +108,13 @@ p a:hover,
 
    This is what the previous value got wrong: `--focus-color: var(--canvas)`
    made the ring exactly the colour of the surface it lands on — 1.00:1, an
-   invisible focus indicator, in BOTH schemes rather than only in dark. The
+   invisible focus indicator, in BOTH themes rather than only in dark. The
    error was easy to miss because the reasoning behind it ("light ring on a
    near-black button") describes the control's fill, which the ring never
    touches.
 
    --canvas-invert is by definition the maximum contrast available against
-   --canvas, and it inverts with the scheme, so one unconditional declaration
+   --canvas, and it inverts with the theme, so one unconditional declaration
    is correct in both: measured 17.05:1 in light and 16.97:1 in dark.
 
    Note that :focus-visible also swaps these controls' own fill to --accent.

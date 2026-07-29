@@ -78,19 +78,36 @@ const diagrams = import.meta.glob<string>('../../assets/evidence/*.svg', {
 const diagram = diagrams[`../../assets/evidence/${slug}.svg`]
 
 /* Authentic screenshots, matched by slug the same way. Files are named
-   `<slug>-<n>.jpg`, so a project can carry several and adding one never
+   `<slug>-<n>.<ext>`, so a project can carry several and adding one never
    touches project data.
 
    Every one of these is a capture of a real running system. Nothing here is
    a mockup: where no genuine screenshot exists the project shows its
-   architecture diagram alone rather than a fabricated interface. */
+   architecture diagram alone rather than a fabricated interface.
+
+   Extensions beyond .jpg are accepted deliberately. A correctly-named capture
+   saved as .jpeg used to be dropped without a word, which is the same class of
+   silent failure as publishing the wrong thing — the author adds evidence,
+   nothing appears, and nothing says why. */
 const shotFiles = import.meta.glob<ImageMetadata>(
-  '../../assets/evidence/shots/*.jpg',
+  '../../assets/evidence/shots/*.{jpg,jpeg,png,webp}',
   { import: 'default', eager: true }
 )
 
 /* Captions describe what the artifact IS. They make no claim about outcomes,
-   scale or results — those would be claims the evidence cannot carry. */
+   scale or results — those would be claims the evidence cannot carry.
+
+   This map is also the MANIFEST: a file is publishable only if it is named
+   here. The directory listing alone is not authority to publish, because the
+   directory is a place files land — twice now, an unrelated image has been
+   dropped into it.
+
+   The slug prefix was already filtering genuinely stray names, so a file
+   called `portrait.jpg` was never at risk. What was at risk is a file whose
+   name merely LOOKS like evidence: `commerce-hub-9.jpg` published as a third
+   capture with an empty <figcaption> and no alt attribute at all, because the
+   caption lookup fell back to an empty string. An unlabelled image published
+   as proof is the exact failure this section exists to prevent. */
 const SHOT_CAPTIONS: Record<string, string> = {
   'commerce-hub-1':
     'Operations dashboard — the administrative home, with product, category, order, customer, analytics, monitoring, user and backup modules in the sidebar. Account and store identifiers are redacted.',
@@ -101,11 +118,30 @@ const SHOT_CAPTIONS: Record<string, string> = {
 }
 
 const shots = Object.entries(shotFiles)
-  .map(([path, img]) => {
-    const key = path.split('/').pop()!.replace('.jpg', '')
-    return { key, img, caption: SHOT_CAPTIONS[key] ?? '' }
-  })
+  .map(([path, img]) => ({
+    key: path.split('/').pop()!.replace(/\.(jpg|jpeg|png|webp)$/, ''),
+    img,
+  }))
+  /* Not addressed to this project — ignored, never published. This is what
+     absorbs a stray file dropped into the directory. */
   .filter((s) => s.key.startsWith(`${slug}-`))
+  .map((s) => {
+    const caption = SHOT_CAPTIONS[s.key]
+    /* Named as this project's evidence but not declared above. Thrown rather
+       than skipped: silently dropping it would hide a real capture the author
+       believes they added, and silently publishing it — the previous
+       behaviour — ships an unlabelled image as proof. Failing here is the only
+       option that tells the truth about which of those two happened. */
+    if (!caption) {
+      throw new Error(
+        `Evidence capture "${s.key}" has no caption in SHOT_CAPTIONS ` +
+          `(src/pages/work/[...slug].astro). Add one describing what the ` +
+          `artifact IS, or move the file out of assets/evidence/shots/ if it ` +
+          `is not project evidence.`
+      )
+    }
+    return { ...s, caption }
+  })
   .sort((a, b) => a.key.localeCompare(b.key))
 
 /* The scan layer. Only rows with a value are emitted — `statusDetail` is
