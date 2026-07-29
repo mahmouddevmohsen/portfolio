@@ -1,0 +1,98 @@
+/* ============================================================================
+   EVIDENCE DIAGRAMS — the colour and type contract for the inlined SVGs.
+
+   The assets in src/assets/evidence/ carry NO fill, stroke or style of their
+   own. That is deliberate: they are inlined rather than loaded through <img>
+   so they inherit the page's typeface and every colour token, which is also
+   what makes them invert with the scheme for free. The consequence is that an
+   evidence SVG rendered without these rules is a black-on-transparent blob.
+
+   This file exists because the diagrams are now rendered in two places — the
+   case study, and the thumbnail on the work index — and the rules had to stop
+   living inside one page's scoped <style>. Two visually identical treatments
+   defined separately is the drift this system rejects elsewhere (see
+   Chip.astro), and it would have been worse here: the second copy would have
+   been the one that silently stopped matching the tokens.
+
+   SIZING IS NOT HERE. Each context sizes its own frame — the case study lets
+   the diagram overflow and scroll at its legible minimum width, the thumbnail
+   deliberately does not. Only what must never differ between them lives here.
+   ========================================================================= */
+
+.diagram .dg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/* Containers: square, hairline, panel fill — the box language. */
+.diagram .dg-node rect {
+  fill: var(--canvas);
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+  rx: 0;
+}
+
+.diagram .dg-node--spine rect {
+  fill: var(--canvas-sunk);
+  stroke: var(--rule-ink);
+}
+
+.diagram .dg-node--out rect {
+  stroke: var(--rule-ink);
+}
+
+/* Index numerals: mono + accent, matching the work-index row language. */
+.diagram .dg-idx {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  fill: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.diagram .dg-label {
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+  fill: var(--ink);
+}
+
+.diagram .dg-sub,
+.diagram .dg-note {
+  font-size: 0.75rem;
+  fill: var(--ink-3);
+}
+
+.diagram .dg-note {
+  font-style: italic;
+}
+
+/* Zones: dashed, unfilled, labelled in the margin — a boundary, not a box. */
+.diagram .dg-zone rect {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.diagram .dg-zone-label {
+  font-size: 0.6875rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  fill: var(--ink-3);
+}
+
+.diagram .dg-line path {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+
+.diagram .dg-line--dashed {
+  stroke-dasharray: 4 3;
+}
+
+.diagram .dg-arrowhead {
+  fill: var(--ink-3);
+  stroke: none;
+}

@@ -27,23 +27,62 @@ import { SITE } from '../config/site'
 
   <span class="rail__wordmark">{SITE.name}</span>
 
-  <span class="rail__foot" aria-hidden="true"></span>
+  {/* Section progress. Populated from [data-section] by the observer in
+      Base.astro rather than rendered here, because the rail ships on every
+      route and only the homepage has numbered sections — hardcoding the list
+      would put a readout on project pages describing sections that are not
+      there.
+
+      aria-hidden: this is a position readout, not navigation. The same
+      sections are already reachable by name from the nav, and a second
+      unlabelled list of bare numerals would add noise without adding a route.
+      It is also why these are not links. */}
+  <ol class="rail__progress" data-rail-progress aria-hidden="true"></ol>
 </div>
 
 <style>
+  /* A three-row grid, not space-between with a spacer. The wordmark has to
+     stay optically centred whatever sits below it, and the progress readout's
+     height depends on how many sections the page has — space-between would
+     drag the wordmark upward as sections were added. The middle row absorbs
+     the slack instead. */
   .rail {
     position: fixed;
     inset-block: 0;
     inset-inline-start: 0;
     inline-size: var(--rail-w);
     z-index: 40;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
     align-items: center;
-    justify-content: space-between;
     padding-block: var(--s-5);
     background: var(--canvas);
     border-inline-end: 1px solid var(--rule);
+  }
+
+  /* Bare numerals in the mono face, matching every other index on the site.
+     The inactive steps sit at --ink-3 rather than being hidden: the reader
+     should see how much document is left, which is the only thing this
+     element adds over the nav. */
+  .rail__progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s-2);
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    line-height: 1;
+    color: var(--ink-3);
+  }
+
+  .rail__step {
+    transition: color var(--dur-1) var(--ease);
+  }
+
+  .rail__step[data-current='true'] {
+    color: var(--accent);
+    font-weight: var(--fw-semibold);
   }
 
   .rail__mark {
@@ -73,13 +112,6 @@ import { SITE } from '../config/site'
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--ink-2);
-  }
-
-  /* Balances the mark at the opposite end so the wordmark sits optically
-     centred rather than merely mathematically centred. */
-  .rail__foot {
-    inline-size: 2rem;
-    block-size: 2rem;
   }
 
   @media (max-width: 64rem) {

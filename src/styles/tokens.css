@@ -225,6 +225,77 @@
   }
 }
 
+/* ============================================================================
+   INVERTED BAND — one section, and only one.
+
+   `--canvas-invert` and `--ink-invert` existed to serve a single button while
+   seven sections shared one uninterrupted surface. This gives the page one
+   structural break instead of a decorative one.
+
+   It works by remapping the surface tokens on the section itself rather than
+   by restyling its children: every descendant already reads `var(--ink)`,
+   `var(--rule)` and `var(--accent)`, so the band inverts without a single
+   component knowing it is inside one.
+
+   The values below are NOT new colours. Each is the exact value the OPPOSITE
+   scheme already declares above — the band is the other scheme, locally. That
+   is what keeps it a distinct band in BOTH schemes: in light it goes dark, and
+   in dark it goes light, so it never collapses into the page it sits in.
+   If a palette value changes above, its twin here must change with it.
+
+   --focus-color is redeclared rather than inherited. A custom property is
+   substituted where it is DECLARED, so the `--focus-color: var(--accent)` at
+   :root is already fixed to the root accent and would keep pointing at it
+   inside this band (see the note at the end of :root).
+
+   Verified both ways: ink 16.34:1, ink-3 4.80:1, accent 7.85:1 on the dark
+   band; ink 17.05:1, ink-3 4.93:1, accent 7.75:1 on the light band.
+   ========================================================================= */
+.section--invert {
+  --canvas: #0f0f0f;
+  --canvas-panel: #161616;
+  --canvas-sunk: #0a0a0a;
+  --canvas-invert: #f2f1ee;
+
+  --ink: #ededea;
+  --ink-2: #a9a7a2;
+  --ink-3: #827f78;
+  --ink-invert: #0f0f0f;
+
+  --rule: #262624;
+  --rule-strong: #3d3d39;
+  --rule-ink: #ededea;
+
+  --accent: #4fb3c7;
+  --accent-hover: #7fcedd;
+  --accent-quiet: rgba(79, 179, 199, 0.12);
+
+  --focus-color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* The page is already dark, so the band takes the light palette. */
+  .section--invert {
+    --canvas: #f7f6f3;
+    --canvas-panel: #ffffff;
+    --canvas-sunk: #efeeea;
+    --canvas-invert: #141414;
+
+    --ink: #141414;
+    --ink-2: #414141;
+    --ink-3: #6b6b6b;
+    --ink-invert: #f7f6f3;
+
+    --rule: #dedcd6;
+    --rule-strong: #c2bfb7;
+    --rule-ink: #141414;
+
+    --accent: #0d5566;
+    --accent-hover: #093c48;
+    --accent-quiet: rgba(13, 85, 102, 0.08);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-1: 0ms;

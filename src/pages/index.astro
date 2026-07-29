@@ -4,10 +4,83 @@ import Base from '../layouts/Base.astro'
 import SectionHead from '../components/SectionHead.astro'
 import ProjectCard from '../components/ProjectCard.astro'
 import Chip from '../components/Chip.astro'
+import { Image } from 'astro:assets'
+import { SITE } from '../config/site'
+
+/* Portrait slot — dormant until an asset exists.
+ *
+ * The glob resolves at build time, so with no matching file the expression is
+ * simply absent and NOTHING is rendered inside the margin column: no avatar
+ * silhouette, no initials block, no grey square. A placeholder portrait is a
+ * claim that a photograph exists, and this page's whole argument is that what
+ * it shows can be checked.
+ *
+ * In src/assets rather than public/ so astro:assets processes it: that is what
+ * produces the responsive srcset and a modern format from a single file. A
+ * copy in public/ is passed through untouched and would need every width
+ * authored by hand.
+ *
+ * To activate: drop ONE file at src/assets/portrait.jpg (or .png/.webp).
+ * Square, at least 816×816 so the 3x column width has real pixels to use.
+ */
+const portraits = import.meta.glob<ImageMetadata>(
+  '../assets/portrait.{jpg,jpeg,png,webp}',
+  { import: 'default', eager: true }
+)
+const portrait = Object.values(portraits)[0]
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => a.data.order - b.data.order
 )
+
+/* Hero proof strip — every figure counted from the collection at build time.
+   --t-display is capped at 3.25rem specifically so the first screen can carry
+   proof rather than atmosphere (see tokens.css); until now the cap was being
+   paid for and nothing was put in the space it bought.
+
+   Counted, never written down. A hardcoded "4 systems" is a claim that goes
+   quietly false the day a fifth project file is added, and this is the one
+   line on the page a sceptical reader is most likely to check against the
+   work index directly below it.
+
+   Sectors are counted rather than named: the declared values run to phrases
+   like "Personal Productivity & AI Infrastructure", which cannot sit in a
+   single dense line at --t-meta without wrapping into a paragraph. */
+const inProduction = projects.filter(
+  (p) => p.data.status === 'In Production'
+).length
+const sectorCount = new Set(
+  projects.map((p) => p.data.study?.sector).filter(Boolean)
+).size
+
+const proof = [
+  { value: projects.length, label: projects.length === 1 ? 'system' : 'systems' },
+  { value: inProduction, label: 'in production' },
+  { value: sectorCount, label: sectorCount === 1 ? 'sector' : 'sectors' },
+]
+
+/* Contact channels beyond email. Each appears only once its URL exists, which
+   is the pattern src/config/site.ts already establishes and explains: an empty
+   string means the channel does not exist yet, and a hidden-but-declared
+   control invites someone later to point it at a URL nobody verified.
+
+   These moved here from the footer's secondary list. Rendering the same three
+   controls in a contact section AND in the footer directly beneath it would
+   be the competing-calls-to-action layout the footer was built to avoid. */
+const channels: { label: string; href: string | null }[] = [
+  { label: 'Book a call', href: SITE.calendlyUrl || null },
+  { label: 'WhatsApp', href: SITE.whatsappUrl || null },
+  { label: 'Download CV', href: SITE.cvUrl || null },
+]
+const visibleChannels = channels.filter(
+  (c): c is { label: string; href: string } => Boolean(c.href)
+)
+
+/* Stated, not estimated. Location, offset and working arrangement are facts
+   about where I am; a response-time claim is deliberately absent because
+   nothing measures it, and "replies within 24 hours" is the kind of line a
+   reader can only discover to be false. */
+const facts = ['Egypt', 'GMT+3', 'Works remotely']
 
 /* How I work — method. What I do on an engagement, in order.
    "Some processes shouldn't be automated" moved OUT of this list and into
@@ -31,19 +104,50 @@ const beliefs = [
   'I’d rather be corrected early than confident late.',
 ]
 
-/* Capabilities — what I can be engaged to build, stated as capabilities
-   rather than a skill list. Eight, not ten: eight divides evenly by the
-   4 / 2 / 1 column counts below, so an empty cell (which renders as a grey
-   slab, see .tiles) can never occur at any width. */
+/* Capabilities — what I can be engaged to build.
+
+   Four, down from eight. The eight were bare index+label pairs, which is a
+   tag cloud with more whitespace: "Web Applications" and "Frontend
+   Development" next to "AI Automation" told a reader nothing about what is
+   actually on offer, and the positioning explicitly rules that shape out.
+
+   The four are the four already named in the hero sub-line, so the page makes
+   one claim rather than two overlapping ones. Every description below is a
+   restatement of a `solution` or `oneLine` already recorded in
+   src/content/projects/ — nothing here is a capability I cannot point at a
+   built system for. The project each rests on is named in a comment so the
+   claim can be checked rather than trusted.
+
+   Four divides evenly by the 2 / 1 column counts below, so an empty cell —
+   which renders as a grey slab, see .tiles — cannot occur at any width. */
 const capabilities = [
-  'AI Automation',
-  'AI Agents',
-  'Internal Tools',
-  'Business Systems',
-  'Web Applications',
-  'Frontend Development',
-  'API Integrations',
-  'Workflow Automation',
+  {
+    name: 'Automation',
+    /* business-automation-engine: "orchestrates AI agents, business workflows,
+       APIs, and communication channels into a unified operational system." */
+    line: 'Workflows, APIs and communication channels orchestrated into one operational system.',
+  },
+  {
+    name: 'Internal tools',
+    /* commerce-hub: "an operational dashboard that consolidates store
+       administration, product management, customer management, order
+       processing, monitoring, and business insights." */
+    line: 'Operational dashboards that consolidate administration, orders and monitoring in one place.',
+  },
+  {
+    name: 'AI agents',
+    /* jarvis-os: "executes, verifies, and orchestrates desktop workflows
+       through architectural verification instead of assumption-based
+       automation." */
+    line: 'Agents that verify what they did, rather than assuming it worked.',
+  },
+  {
+    name: 'Business platforms',
+    /* retail-intelligence-layer: "extracts operational data from existing POS
+       systems using read-only integrations" without "changing their existing
+       workflows." */
+    line: 'Systems joined to the software a business already runs, without replacing it.',
+  },
 ]
 
 /* Stack — what I USE. Capabilities above answer what I BUILD; the two
@@ -125,11 +229,28 @@ const stack = [
         <a class="btn btn--primary on-invert" href="#work">Selected Work</a>
         <a class="btn" href="#contact">Contact</a>
       </div>
+
+      {/* A list, not a row of divs: these are three counts of the same kind of
+          thing, and a screen reader announcing "list, 3 items" is accurate.
+          Numerals take the mono face and the accent, which is the treatment
+          every other index on this site already uses for a figure. */}
+      <ul class="hero__proof" data-reveal style="--reveal-delay:240ms">
+        {
+          proof.map((stat) => (
+            <li class="hero__proof-item meta">
+              <span class="hero__proof-value mono">
+                {String(stat.value).padStart(2, '0')}
+              </span>
+              {stat.label}
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
   {/* --------------------------------------------------------------- INTRO */}
-  <section class="section">
+  <section id="intro" class="section" data-section="01">
     <div class="shell section__inner">
       <SectionHead index="01" label="Intro" />
       <div class="intro">
@@ -147,7 +268,7 @@ const stack = [
   </section>
 
   {/* ------------------------------------------------------- SELECTED WORK */}
-  <section id="work" class="section">
+  <section id="work" class="section" data-section="02">
     <div class="shell section__inner">
       <SectionHead index="02" label="Selected work" aside={`${projects.length} systems`} />
       {/* Full-width rows, not a 2-up grid: the grid forced every multi-word
@@ -173,7 +294,7 @@ const stack = [
   </section>
 
   {/* --------------------------------------------------------- HOW I WORK */}
-  <section id="approach" class="section">
+  <section id="approach" class="section" data-section="03">
     <div class="shell section__inner">
       <SectionHead index="03" label="How I work" />
       <ol class="rows" data-assemble data-reveal>
@@ -190,11 +311,27 @@ const stack = [
   </section>
 
   {/* --------------------------------------------------------------- ABOUT */}
-  <section id="about" class="section">
+  <section id="about" class="section" data-section="04">
     <div class="shell section__inner">
       <SectionHead index="04" label="About" />
       <div class="cols cols--split">
-        <span class="about__side" aria-hidden="true"></span>
+        {/* The column itself stays whether or not a portrait exists — it is
+            what holds the split rhythm shared with the project pages, and
+            removing it would drop the About body into the narrow margin
+            track. What is conditional is its CONTENT. */}
+        <span class="about__side" aria-hidden={!portrait}>
+          {portrait && (
+            <Image
+              class="about__portrait"
+              src={portrait}
+              alt={SITE.name}
+              widths={[136, 272, 408]}
+              sizes="8.5rem"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+        </span>
         <div class="about__body measure prose" data-reveal>
           <p class="lead ink">
             I build AI-powered systems and automation for businesses
@@ -222,20 +359,20 @@ const stack = [
   {/* Last section before the contact block, deliberately: it introduces
       almost nothing new, so its job is not to inform but to restate the
       engageable work at the moment of decision. */}
-  <section class="section">
+  <section id="capabilities" class="section" data-section="05">
     <div class="shell section__inner">
       <SectionHead index="05" label="Capabilities" aside="What I build" />
-      {/* Indexed capability register, not a tag cloud. Each entry gets an
-          index and room of its own so the block reads as an enumerated set of
-          things I do, rather than a keyword list — which is what the
-          positioning explicitly rules out. Structure carries the distinction;
-          no descriptive copy has been invented to prop it up. */}
+      {/* Indexed capability register, not a tag cloud. Each entry now carries
+          a line describing what it actually means, sourced from a built
+          system — structure alone was doing that job before, and structure
+          alone is what a keyword list also has. */}
       <ol class="tiles" data-assemble data-reveal>
         {
           capabilities.map((item, i) => (
             <li class="tile" data-step>
               <span class="tile__index mono">{String(i + 1).padStart(2, '0')}</span>
-              <span class="tile__text">{item}</span>
+              <span class="tile__name">{item.name}</span>
+              <span class="tile__line small">{item.line}</span>
             </li>
           ))
         }
@@ -248,7 +385,7 @@ const stack = [
       lists are the same kind of object — a short enumerated set of claims —
       and giving the second one its own treatment would imply a distinction
       that isn't there. */}
-  <section class="section">
+  <section id="beliefs" class="section section--invert" data-section="06">
     <div class="shell section__inner">
       <SectionHead index="06" label="Beliefs" />
       <ol class="rows" data-assemble data-reveal>
@@ -264,6 +401,42 @@ const stack = [
     </div>
   </section>
 
+  {/* ------------------------------------------------------------- CONTACT */}
+  {/* The nav's #contact anchor used to land on the footer, which is a closing
+      statement rather than a place to find a channel. This section holds the
+      channels; the footer keeps the statement. */}
+  <section id="contact" class="section" data-section="07">
+    <div class="shell section__inner">
+      <SectionHead index="07" label="Contact" />
+      <div class="contact">
+        <div class="contact__lead" data-reveal>
+          <a class="contact__email title" href={`mailto:${SITE.email}`}>
+            {SITE.email}
+          </a>
+          <ul class="contact__facts">
+            {facts.map((f) => <li class="contact__fact meta">{f}</li>)}
+          </ul>
+        </div>
+
+        {/* Rendered only when a channel actually exists — see `channels`. */}
+        {
+          visibleChannels.length > 0 && (
+            <ul class="contact__channels" data-reveal style="--reveal-delay:60ms">
+              {visibleChannels.map((c) => (
+                <li>
+                  <a class="btn" href={c.href}>
+                    <span>{c.label}</span>
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
   {/* --------------------------------------------------------------- STACK */}
   {/* APPENDIX — rendered after the contact block via Base's `appendix` slot.
       The audience is founders, for whom a technology list is the least
@@ -273,9 +446,9 @@ const stack = [
       </footer> would otherwise sit outside every landmark, and a screen
       reader user navigating by landmark would never reach it. `aside` is a
       complementary landmark and is the correct semantics for an appendix. */}
-  <aside slot="appendix" class="section appendix" aria-label="Stack — what I use">
+  <aside slot="appendix" id="stack" class="section appendix" data-section="08" aria-label="Stack — what I use">
     <div class="shell section__inner">
-      <SectionHead index="07" label="Stack" aside="What I use" />
+      <SectionHead index="08" label="Stack" aside="What I use" />
       <ul class="cols cols--2 stack" data-assemble data-reveal>
         {
           stack.map((group) => (
@@ -330,6 +503,32 @@ const stack = [
     flex-wrap: wrap;
     gap: var(--s-3);
     margin-block-start: var(--s-3);
+  }
+
+  /* One dense line. The hairline separators are drawn with a border on the
+     item rather than a glyph, so they disappear correctly when the list wraps
+     at narrow widths instead of leaving a stranded bullet at a line start. */
+  .hero__proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+    margin-block-start: var(--s-5);
+  }
+
+  .hero__proof-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+  }
+
+  .hero__proof-item + .hero__proof-item {
+    padding-inline-start: var(--s-4);
+    border-inline-start: 1px solid var(--rule);
+  }
+
+  .hero__proof-value {
+    font-size: var(--t-meta);
+    color: var(--accent);
   }
 
   .btn {
@@ -405,11 +604,15 @@ const stack = [
   /* --- Tiles ------------------------------------------------------------ */
   /* Explicit column counts, not auto-fill. The 1px gap over a rule-coloured
      background is what draws the hairlines — which means any cell the items
-     don't fill renders as a grey slab. With eight items, 4 / 2 / 1 columns all
-     divide evenly, so an empty cell can never occur at any width. */
+     don't fill renders as a grey slab. Two columns for four items: both 2 and
+     1 divide four evenly, so an empty cell cannot occur at any width.
+
+     Two rather than four columns because each tile now carries a sentence.
+     At four across, that sentence gets a ~14ch measure and breaks into five
+     ragged lines. */
   .tiles {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1px;
     background: var(--rule);
     border: 1px solid var(--rule);
@@ -418,10 +621,10 @@ const stack = [
   .tile {
     display: flex;
     flex-direction: column;
-    gap: var(--s-4);
+    gap: var(--s-3);
     background: var(--canvas);
-    padding: var(--s-5);
-    min-block-size: 7rem;
+    padding: var(--s-6);
+    min-block-size: 9rem;
     transition: background-color var(--dur-1) var(--ease);
   }
 
@@ -434,12 +637,21 @@ const stack = [
     color: var(--accent);
   }
 
-  .tile__text {
+  /* The name is pushed to the bottom of the free space so every tile's name
+     sits on one line regardless of how long its description runs — the
+     alternative lets a two-line description in one cell drag its neighbour's
+     name out of alignment. */
+  .tile__name {
     margin-block-start: auto;
     font-size: var(--t-body);
     font-weight: var(--fw-medium);
     line-height: var(--lh-snug);
     letter-spacing: var(--ls-title);
+  }
+
+  .tile__line {
+    color: var(--ink-3);
+    max-inline-size: 42ch;
   }
 
   /* The appendix lives outside <main>, where the global
@@ -473,6 +685,56 @@ const stack = [
     gap: var(--s-2);
   }
 
+  /* --- Contact -----------------------------------------------------------
+     The address is the section's largest element and a link, not a heading:
+     it is the thing a reader came here to act on. --t-title rather than the
+     display scale because the footer's closing statement below still has to
+     be the louder of the two. */
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+    align-items: flex-start;
+  }
+
+  .contact__lead {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+  }
+
+  .contact__email {
+    color: var(--ink);
+    /* The address is one unbreakable token; without this it overflows a
+       narrow viewport and takes the page's horizontal scrollbar with it —
+       the same failure already measured and fixed in the footer. */
+    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    transition: color var(--dur-1) var(--ease);
+  }
+
+  .contact__email:hover,
+  .contact__email:focus-visible {
+    color: var(--accent);
+  }
+
+  .contact__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+  }
+
+  .contact__fact + .contact__fact {
+    padding-inline-start: var(--s-4);
+    border-inline-start: 1px solid var(--rule);
+  }
+
+  .contact__channels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
   /* --- About ------------------------------------------------------------
      The margin slot previously repeated the name — its fourth appearance on
      one page, directly under a section head already reading ABOUT. It is now
@@ -482,10 +744,19 @@ const stack = [
     display: block;
   }
 
-  @media (max-width: 72rem) {
-    .tiles {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  /* Square, sharp-cornered and desaturated — the same treatment the evidence
+     captures get, so a face does not become the one rounded, full-colour
+     object on a page that has neither anywhere else. Width is capped so the
+     portrait keeps the margin column's measure once that column collapses to
+     a full-width row below 64rem. */
+  .about__portrait {
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 8.5rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    filter: grayscale(1);
   }
 
   @media (max-width: 56rem) {
@@ -498,7 +769,10 @@ const stack = [
     }
   }
 
-  @media (max-width: 34rem) {
+  /* Single column earlier than the old 34rem: two tiles across stop holding a
+     readable measure for the description once the sentence has to share the
+     row, well before the name itself would break. */
+  @media (max-width: 48rem) {
     .tiles {
       grid-template-columns: minmax(0, 1fr);
     }

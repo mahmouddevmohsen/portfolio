@@ -24,17 +24,33 @@ interface Props {
 }
 
 const { items } = Astro.props
+
+/* Placeholder entries are dropped here rather than trusted to be absent.
+   Four "TODO" values shipped to production on this site once; the content
+   file is the wrong and only line of defence, so the component refuses to
+   render them too. `TODO` is matched exactly, not as a substring, so a real
+   value that happens to contain the letters survives. */
+const PLACEHOLDER = /^(todo|tbd|n\/a|-{1,2})$/i
+const shown = (items ?? []).filter(
+  (o) => o.value.trim() !== '' && !PLACEHOLDER.test(o.value.trim())
+)
+
+/* Two is the floor, not one. A single surviving row under a heading reading
+   OUTCOME states less than no section at all — it reads as the other numbers
+   being withheld rather than unmeasured. */
+const MIN_ENTRIES = 2
+const render = shown.length >= MIN_ENTRIES
 ---
 
 {
-  items && items.length > 0 && (
+  render && (
     <section class="section">
       <div class="shell section__inner">
         {/* Em dash index, matching the other unnumbered project-page heads:
             these sections are part of one record, not a numbered sequence. */}
         <SectionHead index="—" label="Outcome" />
         <dl class="outcome" data-reveal>
-          {items.map((o) => (
+          {shown.map((o) => (
             <div class="outcome__row">
               <dt class="label">{o.label}</dt>
               <dd class="outcome__value subtitle">{o.value}</dd>

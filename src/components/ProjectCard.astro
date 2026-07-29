@@ -21,6 +21,23 @@
 
 import Chip from './Chip.astro'
 
+/* Evidence diagram as a row thumbnail.
+   INLINED, not <img src>. These SVGs carry no fill or stroke of their own —
+   they resolve every colour from the page's tokens (see styles/diagram.css),
+   so loaded as an external image they would render as a black blob in an
+   isolated document that cannot reach the stylesheet. Inlining also means the
+   markup is present at first paint, so the row's height is final before any
+   network work happens and the thumbnail cannot shift the layout.
+
+   Matched by slug, exactly as the case-study page does it, so adding or
+   removing a diagram never touches project data. A project with no asset gets
+   no element at all — no empty frame, no fallback graphic. */
+const diagrams = import.meta.glob<string>('../assets/evidence/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
+
 interface Props {
   index: number
   slug: string
@@ -48,6 +65,7 @@ const {
   stack,
 } = Astro.props
 const num = String(index).padStart(2, '0')
+const diagram = diagrams[`../assets/evidence/${slug}.svg`]
 ---
 
 <article class="wrow" data-reveal>
@@ -64,25 +82,38 @@ const num = String(index).padStart(2, '0')
       <span class="wrow__control" aria-hidden="true">&rarr;</span>
     </header>
 
-    <div class="wrow__body">
-      <div class="wrow__block">
-        <span class="wrow__label label">Business problem</span>
-        <p class="wrow__text small">{problem}</p>
-      </div>
-
-      <div class="wrow__block">
-        <span class="wrow__label label">Solution</span>
-        <p class="wrow__text small">{solution}</p>
-      </div>
-
-      {/* Judgment, shown at the point of evidence rather than only inside the
-          case study. A reader who never clicks through still sees that scope
-          was decided, not merely accumulated — which is the one thing this
-          portfolio can show that a feature list cannot. */}
-      {notBuilt && (
+    <div class="wrow__main">
+      <div class="wrow__body">
         <div class="wrow__block">
-          <span class="wrow__label label">Deliberately not built</span>
-          <p class="wrow__text wrow__text--muted small">{notBuilt}</p>
+          <span class="wrow__label label">Business problem</span>
+          <p class="wrow__text small">{problem}</p>
+        </div>
+
+        <div class="wrow__block">
+          <span class="wrow__label label">Solution</span>
+          <p class="wrow__text small">{solution}</p>
+        </div>
+
+        {/* Judgment, shown at the point of evidence rather than only inside the
+            case study. A reader who never clicks through still sees that scope
+            was decided, not merely accumulated — which is the one thing this
+            portfolio can show that a feature list cannot. */}
+        {notBuilt && (
+          <div class="wrow__block">
+            <span class="wrow__label label">Deliberately not built</span>
+            <p class="wrow__text wrow__text--muted small">{notBuilt}</p>
+          </div>
+        )}
+      </div>
+
+      {/* aria-hidden rather than alt="": this is inline SVG, and the asset
+          carries its own role="img" and <title>. Announcing it would repeat
+          the row the reader has already heard, at a size where the diagram is
+          texture rather than information — the legible copy is on the case
+          study. Hidden entirely is the honest treatment. */}
+      {diagram && (
+        <div class="wrow__media diagram" aria-hidden="true">
+          <Fragment set:html={diagram} />
         </div>
       )}
     </div>
@@ -114,9 +145,29 @@ const num = String(index).padStart(2, '0')
     border-block-start: 1px solid var(--rule);
   }
 
+  /* The accent bar is a transparent border at rest, not one added on hover:
+     added, it would push every row 2px sideways at the moment the pointer
+     arrives. The negative margin pulls the reserved 2px back into the gutter
+     so the row's text edge is identical to every other section on the page.
+
+     Surface and bar share one transition. --dur-2 rather than --dur-1: this
+     covers the whole row rather than a single glyph, and at 120ms a change of
+     that area reads as a flash. */
   .wrow__link {
     display: block;
     padding-block: var(--s-5);
+    padding-inline-start: var(--s-4);
+    margin-inline: calc(-1 * (var(--s-4) + 2px)) calc(-1 * var(--s-4));
+    padding-inline-end: var(--s-4);
+    border-inline-start: 2px solid transparent;
+    transition: background-color var(--dur-2) var(--ease),
+      border-color var(--dur-2) var(--ease);
+  }
+
+  .wrow__link:hover,
+  .wrow__link:focus-visible {
+    background: var(--canvas-panel);
+    border-inline-start-color: var(--accent);
   }
 
   /* --- The operational line ---------------------------------------- */
@@ -162,6 +213,23 @@ const num = String(index).padStart(2, '0')
       transform var(--dur-1) var(--ease-out);
   }
 
+  /* The prose and the thumbnail sit side by side, and the indent that aligns
+     them under the name moved up here from .wrow__body so both share it.
+
+     The thumbnail track is FIXED and the prose track is the flexible one, so
+     adding the diagram cannot narrow the text below its own minimum — it is
+     the thumbnail that gives way. The head is deliberately outside this grid:
+     project names staying on one line is load-bearing (see the note at the top
+     of this file), so nothing here is allowed to touch that row's width. */
+  .wrow__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    gap: var(--s-6);
+    align-items: start;
+    margin-block-start: var(--s-5);
+    padding-inline-start: calc(2.25rem + var(--s-4));
+  }
+
   /* --- Prose: two columns, so full width buys density not line length -- */
   .wrow__body {
     display: grid;
@@ -170,8 +238,34 @@ const num = String(index).padStart(2, '0')
        Measured: 3px overflow at 320 before this. */
     grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
     gap: var(--s-5) var(--s-8);
-    margin-block-start: var(--s-5);
-    padding-inline-start: calc(2.25rem + var(--s-4));
+  }
+
+  /* --- Evidence thumbnail ------------------------------------------------
+     Quiet at rest: the row is a text index, and four full-colour diagrams
+     down the page would compete with the project names for first read. It
+     resolves to full colour on hover or keyboard focus anywhere in the row,
+     which is the moment the reader has chosen this project.
+
+     Colour comes from styles/diagram.css; only the frame and the resting
+     treatment are here. */
+  .wrow__media {
+    border: 1px solid var(--rule);
+    background: var(--canvas-panel);
+    padding: var(--s-3);
+    /* saturate(0) rather than a lower opacity alone: dropping opacity far
+       enough to recede would also fade the hairlines out of existence, and the
+       frame has to keep reading as a container. */
+    filter: saturate(0);
+    opacity: 0.55;
+    transition: opacity var(--dur-2) var(--ease), filter var(--dur-2) var(--ease);
+  }
+
+  /* focus-within, not just hover: the row's only focusable element is the
+     link that wraps it, so a keyboard reader gets the same reveal. */
+  .wrow__link:hover .wrow__media,
+  .wrow__link:focus-visible .wrow__media {
+    filter: none;
+    opacity: 1;
   }
 
   .wrow__label {
@@ -226,10 +320,16 @@ const num = String(index).padStart(2, '0')
     transform: translateX(3px);
   }
 
+  /* --shift is the system's one displacement value and was previously declared
+     but unused. The arrow is the right place for it: it is the only element
+     here whose whole job is to point, so it is the one that can travel the
+     full 8px without the row appearing to move. It also comes with reduced
+     motion handled — --shift resolves to 0px there, so no separate rule is
+     needed to stop this one. */
   .wrow__link:hover .wrow__control,
   .wrow__link:focus-visible .wrow__control {
     color: var(--accent);
-    transform: translateX(3px);
+    transform: translateX(var(--shift));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -246,8 +346,21 @@ const num = String(index).padStart(2, '0')
     }
   }
 
+  /* The prose needs the full width back before it reaches its own two-column
+     floor. The thumbnail is the first thing to go because it is the only
+     element here carrying no information the row does not already state. */
+  @media (max-width: 64rem) {
+    .wrow__main {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wrow__media {
+      display: none;
+    }
+  }
+
   @media (max-width: 40rem) {
-    .wrow__body,
+    .wrow__main,
     .wrow__foot {
       padding-inline-start: 0;
     }

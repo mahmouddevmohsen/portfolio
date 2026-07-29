@@ -26,14 +26,11 @@ const email = SITE.email
    absent rather than null-and-hidden: a hidden placeholder invites someone
    later to fill it with a guess.
 
-   The three action channels reuse the secondary link treatment rather than
-   introducing a second button style. They are calls to action, but the footer
-   already has exactly one primary control by design — a row of competing
-   buttons is the segmented-path layout this block was built to avoid. */
+   Booking, WhatsApp and CV moved to the contact section on the homepage. The
+   footer sits directly beneath it, and rendering the same three controls in
+   both is exactly the competing-calls-to-action layout this block exists to
+   avoid. Verification stays here; action moved up. */
 const secondary: { label: string; href: string | null }[] = [
-  { label: 'Book a call', href: SITE.calendlyUrl || null },
-  { label: 'WhatsApp', href: SITE.whatsappUrl || null },
-  { label: 'Download CV', href: SITE.cvUrl || null },
   { label: 'GitHub', href: SITE.showGithub ? SITE.githubUrl : null },
 ]
 const visibleSecondary = secondary.filter(
@@ -43,7 +40,10 @@ const visibleSecondary = secondary.filter(
 const year = 2026
 ---
 
-<footer id="contact" class="section foot">
+{/* The #contact anchor moved to the homepage's contact section, which is where
+    a reader following it expects to land. Two elements cannot share the id,
+    and a footer is a closing statement rather than a destination. */}
+<footer class="section foot">
   <div class="shell section__inner">
     <div class="foot__grid">
       <p class="foot__statement section-title" data-reveal>

@@ -57,6 +57,18 @@ const links = [
     border-block-end-color: currentColor;
   }
 
+  /* Active section. Set by the single position observer in Base.astro, which
+     also drives the rail's progress readout — see the note there.
+
+     The underline is what carries the state; colour alone would be
+     indistinguishable from the hover it shares. It matches the hover
+     treatment deliberately: the reader is being told "this is the one you are
+     on", which is the same statement hover makes about the pointer. */
+  .nav__link.is-current {
+    color: var(--accent);
+    border-block-end-color: currentColor;
+  }
+
   .nav__disclosure {
     display: none;
     position: relative;

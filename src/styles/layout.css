@@ -37,6 +37,23 @@
   padding-block: var(--s-6);
 }
 
+/* The inverted band. Its palette is remapped in tokens.css; what belongs here
+   is only that it paints its own surface and takes the slowest pacing in the
+   scale — the extra height is what makes a change of surface read as a
+   deliberate band rather than as a mis-styled section.
+
+   The top hairline is dropped: the surface change already draws the boundary,
+   and a rule in the previous section's colour across it reads as a seam. */
+.section--invert {
+  background: var(--canvas);
+  color: var(--ink);
+  border-block-start: 0;
+}
+
+.section--invert .section__inner {
+  padding-block: var(--pace-slow);
+}
+
 /* --- Section head: eyebrow + rule, Elias's labelled header re-derived --- */
 .head {
   display: flex;
@@ -45,9 +62,14 @@
   margin-block-end: var(--s-7);
 }
 
+/* Raised from --t-label/--fw-medium. At 12px with 0.1em tracking the accent
+   was carrying no colour at all — a hue reads as grey once the strokes are
+   thin enough, so the one element on the page that is always accent-coloured
+   was the one place it never showed. --t-meta at semibold is still an eyebrow,
+   not a heading, and the section label beside it stays the louder of the two. */
 .head__index {
-  font-size: var(--t-label);
-  font-weight: var(--fw-medium);
+  font-size: var(--t-meta);
+  font-weight: var(--fw-semibold);
   color: var(--accent);
   letter-spacing: var(--ls-label);
   flex: none;

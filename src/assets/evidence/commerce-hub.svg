@@ -68,14 +68,14 @@
 
   <g class="dg-node">
     <rect x="130" y="311" width="200" height="46" />
-    <text class="dg-idx" x="142" y="335">04</text>
-    <text class="dg-label" x="142" y="341">Customer management</text>
+    <text class="dg-idx" x="142" y="330">04</text>
+    <text class="dg-label" x="142" y="348">Customer management</text>
   </g>
 
   <g class="dg-node">
     <rect x="850" y="311" width="200" height="46" />
-    <text class="dg-idx" x="862" y="335">05</text>
-    <text class="dg-label" x="862" y="341">Analytics</text>
+    <text class="dg-idx" x="862" y="330">05</text>
+    <text class="dg-label" x="862" y="348">Analytics</text>
   </g>
 
   <defs>

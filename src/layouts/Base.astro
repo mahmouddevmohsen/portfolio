@@ -4,6 +4,10 @@ import '../styles/base.css'
 import '../styles/layout.css'
 import '../styles/type.css'
 import '../styles/motion.css'
+/* Global because the evidence diagrams are now inlined on two different
+   routes (the case study and the work index thumbnail) and must resolve the
+   same tokens in both. ~2KB, and it replaces a duplicated block. */
+import '../styles/diagram.css'
 import Rail from '../components/Rail.astro'
 import SiteHeader from '../components/SiteHeader.astro'
 import SiteFooter from '../components/SiteFooter.astro'
@@ -160,6 +164,85 @@ const person = {
           ;(step as HTMLElement).style.setProperty('--step-index', String(i))
         })
       })
+
+      /* ------------------------------------------------------------------
+         SECTION POSITION — one observer, two readouts.
+
+         The nav's active link and the rail's progress indicator answer the
+         same question: which section is the reader in. Two observers would be
+         two answers, and they would disagree at every boundary — the nav
+         highlighting one section while the rail counts another is worse than
+         neither existing. So this is deliberately a single observer whose
+         result is written to both.
+
+         The rail list is built here rather than in Rail.astro because the
+         rail renders on every route and only the homepage has numbered
+         sections; markup written server-side would describe sections that do
+         not exist on a project page.
+
+         rootMargin collapses the viewport to a band across its middle, so
+         "current" means the section crossing the reader's eye line rather
+         than whichever one happens to touch the top edge. Without it, a short
+         section entering at the bottom steals the state from the one being
+         read.
+         ------------------------------------------------------------------ */
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-section]')
+      )
+
+      if (sections.length > 0) {
+        const railList = document.querySelector<HTMLElement>('[data-rail-progress]')
+        const steps = new Map<string, HTMLElement>()
+
+        if (railList) {
+          for (const section of sections) {
+            const step = document.createElement('li')
+            step.className = 'rail__step'
+            step.textContent = section.dataset.section ?? ''
+            railList.append(step)
+            steps.set(section.id, step)
+          }
+        }
+
+        const navLinks = Array.from(
+          document.querySelectorAll<HTMLAnchorElement>('.nav__link')
+        )
+
+        const visible = new Set<string>()
+
+        const paint = () => {
+          /* Document order, not observation order: with several sections in
+             the band at once the topmost is the one being read. */
+          const current = sections.find((s) => visible.has(s.id))?.id
+          if (!current) return
+
+          for (const [id, step] of steps) {
+            step.dataset.current = String(id === current)
+          }
+
+          for (const link of navLinks) {
+            const target = link.getAttribute('href')?.split('#')[1]
+            const isCurrent = target === current
+            link.classList.toggle('is-current', isCurrent)
+            /* aria-current is the semantic; the class is only for paint. */
+            if (isCurrent) link.setAttribute('aria-current', 'true')
+            else link.removeAttribute('aria-current')
+          }
+        }
+
+        const positionObserver = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) visible.add(entry.target.id)
+              else visible.delete(entry.target.id)
+            }
+            paint()
+          },
+          { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+        )
+
+        sections.forEach((section) => positionObserver.observe(section))
+      }
 
       /* Reveal-on-scroll-up for the top bar.
          Hidden while moving down the page (reading), restored the moment the

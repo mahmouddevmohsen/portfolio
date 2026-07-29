@@ -276,7 +276,7 @@ const facts: { term: string; value: string }[] = study
                     diagram renders its labels illegibly small. The ordered
                     callouts below carry the same sequence as text, so a
                     reader who does not scroll loses nothing. */}
-                <div class="evidence__frame">
+                <div class="evidence__frame diagram">
                   <Fragment set:html={diagram} />
                 </div>
                 <figcaption class="small">{study.evidence.caption}</figcaption>
@@ -499,10 +499,12 @@ const facts: { term: string; value: string }[] = study
   }
 
   /* --- Evidence diagrams -------------------------------------------------
-     Inlined SVG, so it inherits the page typeface and every colour token.
-     Nothing here is diagram-specific styling invented for one asset: the
-     grammar is the same square containers, hairlines and accent indices the
-     rest of the system already uses. */
+     Colour and type for the inlined SVG now live in src/styles/diagram.css,
+     shared with the work-index thumbnail — see the header there for why they
+     could not stay in this file. What remains below is the part that is true
+     of THIS context only: the case study is where the diagram has to be
+     readable, so it holds a legible minimum width and scrolls rather than
+     shrinking. The thumbnail deliberately does the opposite. */
   .evidence__frame {
     overflow-x: auto;
     border: 1px solid var(--rule);
@@ -511,82 +513,7 @@ const facts: { term: string; value: string }[] = study
   }
 
   .evidence__frame :global(.dg) {
-    display: block;
-    inline-size: 100%;
     min-inline-size: 40rem;
-    block-size: auto;
-  }
-
-  /* Containers: square, hairline, panel fill — the box language. */
-  .evidence__frame :global(.dg-node rect) {
-    fill: var(--canvas);
-    stroke: var(--rule-strong);
-    stroke-width: 1;
-    rx: 0;
-  }
-
-  .evidence__frame :global(.dg-node--spine rect) {
-    fill: var(--canvas-sunk);
-    stroke: var(--rule-ink);
-  }
-
-  .evidence__frame :global(.dg-node--out rect) {
-    stroke: var(--rule-ink);
-  }
-
-  /* Index numerals: mono + accent, matching the work-index row language. */
-  .evidence__frame :global(.dg-idx) {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    fill: var(--accent);
-    letter-spacing: 0.04em;
-  }
-
-  .evidence__frame :global(.dg-label) {
-    font-size: 0.875rem;
-    font-weight: var(--fw-medium);
-    fill: var(--ink);
-  }
-
-  .evidence__frame :global(.dg-sub),
-  .evidence__frame :global(.dg-note) {
-    font-size: 0.75rem;
-    fill: var(--ink-3);
-  }
-
-  .evidence__frame :global(.dg-note) {
-    font-style: italic;
-  }
-
-  /* Zones: dashed, unfilled, labelled in the margin — a boundary, not a box. */
-  .evidence__frame :global(.dg-zone rect) {
-    fill: none;
-    stroke: var(--rule);
-    stroke-width: 1;
-    stroke-dasharray: 3 3;
-  }
-
-  .evidence__frame :global(.dg-zone-label) {
-    font-size: 0.6875rem;
-    font-weight: var(--fw-medium);
-    letter-spacing: var(--ls-label);
-    text-transform: uppercase;
-    fill: var(--ink-3);
-  }
-
-  .evidence__frame :global(.dg-line path) {
-    fill: none;
-    stroke: var(--ink-3);
-    stroke-width: 1;
-  }
-
-  .evidence__frame :global(.dg-line--dashed) {
-    stroke-dasharray: 4 3;
-  }
-
-  .evidence__frame :global(.dg-arrowhead) {
-    fill: var(--ink-3);
-    stroke: none;
   }
 
   .evidence__caption {

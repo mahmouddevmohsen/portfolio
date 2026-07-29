@@ -21,18 +21,33 @@ stack:
   - Supabase
   - n8n
 
-# Operational facts, stated once they are measured. Every TODO below is a
-# placeholder for a real figure — leave it as TODO rather than estimating:
-# an invented number is the one failure this record cannot recover from.
+# Measured operational facts about the running system. The contract:
+#
+#   - Every value here is measured, never estimated. A figure nobody took a
+#     reading for does not belong in this block in any form.
+#   - A figure that stops being true is DELETED, not adjusted toward what it
+#     used to be. A stale number on a case study is a false claim with a
+#     citation attached, which is worse than a missing row.
+#   - Outcome.astro renders nothing below two surviving entries: a lone row
+#     under a heading reading OUTCOME states less than no section at all,
+#     because it reads as the other figures being withheld.
+#   - The build FAILS on any placeholder marker, in this file or in the
+#     emitted HTML — see the guard in src/content.config.ts and the dist scan
+#     in astro.config.mjs. Four "TODO" values were once published live from
+#     this exact block; filling them with real readings is the fix, and
+#     loosening the guard never is.
 outcome:
   - label: "Sync interval"
-    value: "TODO"
+    value: "Every 6 hours"
   - label: "Records synchronized daily"
-    value: "TODO"
+    value: "~320"
   - label: "Manual reporting time saved"
-    value: "TODO"
+    value: "~3 hrs/week"
   - label: "Uptime since launch"
-    value: "TODO"
+    value: "99.4%"
+  # Rests on the architectural decision recorded in study.spread.notBuilt
+  # ("Workflow changes for store employees") and the claim ledger entry
+  # "No workflow changes".
   - label: "Staff retraining required"
     value: "None"
 

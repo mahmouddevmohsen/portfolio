@@ -27,6 +27,55 @@ import { glob } from 'astro/loaders'
    cannot drift apart.
    ========================================================================= */
 
+/* ----------------------------------------------------------------------------
+   PLACEHOLDER GUARD — field level.
+
+   Four `outcome` rows carrying the literal string "TODO" reached a live
+   project page. Every existing check passed them: they were non-empty strings
+   of adequate length, which is all the schema asked for.
+
+   So the vocabulary is now closed against markers as well as against empty
+   values. Matched whole-string after trimming, never as a substring: a real
+   value is allowed to contain these letters, it just may not consist of them.
+
+   `authoring` is deliberately exempt — it is never rendered, and it is the one
+   place where an open question is supposed to be written down rather than
+   resolved. See the walk in `assertNoPlaceholders`.
+   -------------------------------------------------------------------------- */
+const PLACEHOLDER = /^(todo|tbd|fixme|n\/a|tba|coming soon|lorem ipsum|replace_me|-{1,2}|\?+)$/i
+
+/** Walks every rendered string in a project record and reports each marker. */
+const assertNoPlaceholders = (
+  value: unknown,
+  ctx: z.RefinementCtx,
+  path: (string | number)[] = []
+): void => {
+  if (typeof value === 'string') {
+    if (PLACEHOLDER.test(value.trim())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path,
+        message:
+          `"${value}" is a placeholder, and this field is rendered. Supply a ` +
+          `real value or remove the entry — a marker on a live page is worse ` +
+          `than an absent section.`,
+      })
+    }
+    return
+  }
+  if (Array.isArray(value)) {
+    value.forEach((v, i) => assertNoPlaceholders(v, ctx, [...path, i]))
+    return
+  }
+  if (value && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) {
+      /* Never rendered, and the designated home for unresolved questions. */
+      if (k === 'authoring') continue
+      assertNoPlaceholders(v, ctx, [...path, k])
+    }
+  }
+}
+
 /** A narrative beat. Long enough that a one-word placeholder fails. */
 const beat = z
   .string()
@@ -187,6 +236,8 @@ const projects = defineCollection({
       study: study.optional(),
     })
     .superRefine((data, ctx) => {
+      assertNoPlaceholders(data, ctx)
+
       if (!data.studyPending && !data.study) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
