@@ -23,7 +23,26 @@ import { SITE } from '../config/site'
       <span class="bar__name">{SITE.name}</span>
       <span class="bar__role meta">Business systems</span>
     </a>
-    <Nav />
+    <div class="bar__end">
+      <Nav />
+
+      {/* The label names the theme the reader would MOVE TO, not the one they
+          are in — a control captioned with the current state reads as a status
+          readout and gets clicked expecting nothing to happen.
+
+          Which label shows is decided in CSS from the root attribute, not by
+          script. That means it is already correct in the HTML the pre-paint
+          script produced, so the control never renders one word and then
+          swaps to the other. The visually-hidden fragments make the accessible
+          name a whole sentence — "Switch to light theme" — rather than a bare
+          adjective. */}
+      <button class="theme" type="button" data-theme-toggle>
+        <span class="visually-hidden">Switch to </span>
+        <span class="theme__label theme__label--light">light</span>
+        <span class="theme__label theme__label--dark">dark</span>
+        <span class="visually-hidden"> theme</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -53,6 +72,57 @@ import { SITE } from '../config/site'
     display: flex;
     align-items: baseline;
     gap: var(--s-3);
+  }
+
+  .bar__end {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-5);
+  }
+
+  /* Hidden until JS is confirmed present. The control does nothing without
+     it, and a dead button is worse than an absent one — the reader clicks,
+     gets no response, and concludes the site is broken rather than that a
+     feature is unavailable. `.js` is set by the inline script in <head>. */
+  .theme {
+    display: none;
+  }
+
+  :global(.js) .theme {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--rule-strong);
+    background: none;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: var(--t-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--dur-1) var(--ease),
+      border-color var(--dur-1) var(--ease);
+  }
+
+  .theme:hover,
+  .theme:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* One label per theme, chosen by the same attribute that selects the
+     palette — so the two can never disagree. */
+  .theme__label--dark {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .theme__label--light {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .theme__label--dark {
+    display: inline;
   }
 
   .bar__name {

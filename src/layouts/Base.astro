@@ -72,10 +72,11 @@ const person = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {/* Both schemes are supported and OS-driven. This is what lets the UA
-        pick dark form controls, scrollbars and the <dialog> backdrop default
-        to match, rather than painting light chrome over a dark document. */}
-    <meta name="color-scheme" content="light dark" />
+    {/* Dark first: the order states which this document prefers, so a UA that
+        paints chrome before the stylesheet arrives picks the right one. Both
+        are listed because light is genuinely available, not merely tolerated.
+        The authoritative declaration is `color-scheme` in tokens.css. */}
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     {/* The one font file, on the critical path. Preloaded so it is fetched in
         parallel with the stylesheet rather than after it — without this the
@@ -118,8 +119,27 @@ const person = {
       )
     }
 
+    {/* Inline and in <head>, so it runs BEFORE first paint. A stored light
+        preference applied from the deferred module script instead would paint
+        the dark default first and then repaint — the flash-of-wrong-theme that
+        makes a toggle feel broken.
+
+        `is:inline` keeps it out of the bundle: a bundled module is deferred by
+        definition, which is exactly what this must not be.
+
+        Dark needs no attribute, so nothing is applied on the default path.
+        localStorage access is wrapped because it throws outright in some
+        privacy modes — and the correct surface is already showing there, so
+        swallowing it leaves the reader in the right place. */}
     <script is:inline>
       document.documentElement.classList.add('js')
+      try {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.dataset.theme = 'light'
+        }
+      } catch (e) {
+        /* No stored preference is retrievable; the default already applies. */
+      }
     </script>
   </head>
 
@@ -164,6 +184,38 @@ const person = {
           ;(step as HTMLElement).style.setProperty('--step-index', String(i))
         })
       })
+
+      /* ------------------------------------------------------------------
+         THEME — dark by default, light on request.
+
+         The attribute is the single source of truth: tokens.css keys the
+         light palette off `:root[data-theme='light']`, and the pre-paint
+         script in <head> restores it. This only has to flip the attribute and
+         record the choice.
+
+         Both values are written, not just 'light'. Storing only the
+         non-default would make an explicit choice indistinguishable from
+         never having chosen, and the default is then free to change later
+         without silently overriding people who already decided.
+         ------------------------------------------------------------------ */
+      const themeToggle = document.querySelector<HTMLElement>('[data-theme-toggle]')
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const root = document.documentElement
+          const nextIsLight = root.dataset.theme !== 'light'
+
+          if (nextIsLight) root.dataset.theme = 'light'
+          else delete root.dataset.theme
+
+          try {
+            localStorage.setItem('theme', nextIsLight ? 'light' : 'dark')
+          } catch (e) {
+            /* Unstorable, so the choice lasts this page only. Applying it is
+               still the right response to the click. */
+          }
+        })
+      }
 
       /* ------------------------------------------------------------------
          SECTION POSITION — one observer, two readouts.

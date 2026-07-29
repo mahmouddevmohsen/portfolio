@@ -17,35 +17,69 @@
    ========================================================================= */
 
 :root {
+  /* DARK IS THE DEFAULT. The palette below is the dark one, and it applies
+     with no attribute set, no media query matched and no JavaScript run — a
+     reader with scripting disabled, or with the stylesheet cached before the
+     theme script executes, still gets the intended surface rather than a
+     flash of the other one.
+
+     Light is opt-in: `:root[data-theme='light']` further down. It is reached
+     only by an explicit choice through the header control, which is stored
+     and re-applied before first paint. `prefers-color-scheme` deliberately
+     does NOT select it — the site has a default, and an OS preference is not
+     the same statement as a preference for this document.
+
+     `color-scheme` is declared so the UA paints scrollbars, form controls and
+     the <dialog> backdrop default to match. Without it those stay light while
+     everything around them is dark. */
+  color-scheme: dark;
+
   /* --- CANVAS ------------------------------------------------------- */
-  --canvas: #f7f6f3;
-  --canvas-panel: #ffffff;
-  --canvas-sunk: #efeeea;
-  --canvas-invert: #141414;
+  --canvas: #0f0f0f;
+  --canvas-panel: #161616;
+  --canvas-sunk: #0a0a0a;
+  --canvas-invert: #f2f1ee;
   /* Modal scrim. A token rather than a literal in the component, because a
-     hardcoded rgba() is the one kind of colour that cannot follow the scheme.
-     Both schemes darken — a scrim's job is to recede whatever is behind it,
-     which is true regardless of how light that content is. */
-  --scrim: rgb(20 20 20 / 0.72);
+     hardcoded rgba() is the one kind of colour that cannot follow the theme.
+     Both themes darken — a scrim's job is to recede whatever is behind it,
+     which is true regardless of how light that content is. Deeper here than
+     in light, because the page behind it is already near-black and the same
+     72% reads as almost no separation. */
+  --scrim: rgb(0 0 0 / 0.82);
 
   /* --- INK — high contrast is mandatory ----------------------------- */
-  --ink: #141414;
-  --ink-2: #414141;
-  --ink-3: #6b6b6b;
-  --ink-invert: #f7f6f3;
+  --ink: #ededea;
+  --ink-2: #a9a7a2;
+  /* Measured: the originally specified #78766f holds 4.22:1 on --canvas and
+     3.98:1 on --canvas-panel, under the 4.5:1 floor on both, and --ink-3
+     carries real content here (figure captions, the "deliberately not built"
+     line, diagram connector strokes). #827f78 measures 4.80:1 and 4.53:1 and
+     stays well below --ink-2 at 7.97:1, so the three-step ink hierarchy is
+     preserved rather than flattened to two. */
+  --ink-3: #827f78;
+  --ink-invert: #0f0f0f;
 
   /* --- STRUCTURE — the box language, borrowed from Elias ------------ */
-  --rule: #dedcd6;
-  --rule-strong: #c2bfb7;
-  --rule-ink: #141414;
+  --rule: #262624;
+  --rule-strong: #3d3d39;
+  --rule-ink: #ededea;
 
   /* --- ACCENT — one hue, defined semantics -------------------------- */
   /* Not purple / crimson / orange (those are Elias, Carl, BrightEdge).
      Permitted: indices, eyebrow labels, interaction, active state.
-     Forbidden: backgrounds, gradients, decoration. */
-  --accent: #0d5566;
-  --accent-hover: #093c48;
-  --accent-quiet: rgba(13, 85, 102, 0.08);
+     Forbidden: backgrounds, gradients, decoration.
+
+     The hue is the same ~193° in both themes and is held deliberately: the
+     accent is an identity as much as a signal, and a hue shift between themes
+     would read as two different sites. Only luminance moves, and it has to —
+     the light theme's #0d5566 holds 9.3:1 on a near-white canvas and about
+     1.4:1 on this one, which would delete every index and link on the page. */
+  --accent: #4fb3c7;
+  --accent-hover: #7fcedd;
+  /* 12% rather than the light theme's 8%: an identical alpha over a dark
+     surface produces a materially weaker wash, so the number moves to hold
+     the appearance constant rather than the value. */
+  --accent-quiet: rgba(79, 179, 199, 0.12);
 
   /* --- TYPE --------------------------------------------------------- */
   /* One grotesque carries display, structure and body. Inter Tight, chosen
@@ -163,66 +197,45 @@
 }
 
 /* ============================================================================
-   DARK SCHEME — OS-driven only. There is no toggle and no stored preference:
-   the scheme is a property of the reader's system, not a setting this document
-   offers to manage.
+   LIGHT THEME — opt-in, never automatic.
+
+   Reached only by `data-theme="light"` on <html>, which the header control
+   sets and stores. It is deliberately NOT wired to `prefers-color-scheme`:
+   this document has a default surface, and an OS-level preference is a
+   statement about a reader's other applications, not a request to restyle
+   this one. A reader who wants light asks for it once, here, and the choice
+   persists.
 
    Only the palette is redeclared. Type scale, weights, line-heights, spacing,
-   shape and every motion token are scheme-independent by construction and are
-   deliberately absent below — a dark scheme is a change of surface, not a
-   change of typography or tempo.
+   shape and every motion token are theme-independent by construction and are
+   deliberately absent below — a theme is a change of surface, not a change of
+   typography or tempo.
 
-   THE ACCENT.
-
-   The hue is unchanged. #0d5566 and #4fb3c7 are the same colour at different
-   luminance: roughly 193° in both cases, held deliberately, because the accent
-   is an identity as much as a signal and a hue shift between schemes would
-   read as two different sites.
-
-   What changes is luminance, and it has to. The accent's contract is that it
-   is legible ON the canvas — indices, eyebrow labels, interaction, active
-   state — and NEVER a background, gradient or decoration. A dark teal that
-   holds 9.3:1 against a near-white canvas holds about 1.4:1 against a
-   near-black one, which would delete every index and every link on the page.
-   Raising luminance is therefore not a restyling; it is the only way to keep
-   the existing contract true once the surface beneath it inverts.
-
-   `--accent-quiet` keeps the same role (a hover wash and the selection
-   highlight) and is lifted from 8% to 12% alpha: an identical alpha over a
-   dark surface produces a materially weaker wash, so the number moves to hold
-   the appearance constant rather than the value.
+   Every value here is the one this file shipped as its default before dark
+   became the default. Nothing was re-picked; the two palettes simply swapped
+   which one needs an attribute to reach it.
    ========================================================================= */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --canvas: #0f0f0f;
-    --canvas-panel: #161616;
-    --canvas-sunk: #0a0a0a;
-    --canvas-invert: #f2f1ee;
+:root[data-theme='light'] {
+  color-scheme: light;
 
-    --ink: #ededea;
-    --ink-2: #a9a7a2;
-    /* Specified as #78766f, raised to #827f78 (same hue, +8% luminance).
-       Measured, #78766f holds 4.22:1 on --canvas and 3.98:1 on --canvas-panel
-       — below the 4.5:1 floor on both, and --ink-3 carries real content here
-       (figure captions, the "deliberately not built" line, stack chips), not
-       decoration. #827f78 measures 4.80:1 and 4.53:1 and stays well below
-       --ink-2 at 7.97:1, so the three-step ink hierarchy is preserved. */
-    --ink-3: #827f78;
-    --ink-invert: #0f0f0f;
+  --canvas: #f7f6f3;
+  --canvas-panel: #ffffff;
+  --canvas-sunk: #efeeea;
+  --canvas-invert: #141414;
+  --scrim: rgb(20 20 20 / 0.72);
 
-    --rule: #262624;
-    --rule-strong: #3d3d39;
-    --rule-ink: #ededea;
+  --ink: #141414;
+  --ink-2: #414141;
+  --ink-3: #6b6b6b;
+  --ink-invert: #f7f6f3;
 
-    --accent: #4fb3c7;
-    --accent-hover: #7fcedd;
-    --accent-quiet: rgba(79, 179, 199, 0.12);
+  --rule: #dedcd6;
+  --rule-strong: #c2bfb7;
+  --rule-ink: #141414;
 
-    /* The modal scrim. Deeper than the light value: the page behind it is
-       already near-black, so the same 72% reads as almost no separation
-       between the dialog and what it is covering. */
-    --scrim: rgb(0 0 0 / 0.82);
-  }
+  --accent: #0d5566;
+  --accent-hover: #093c48;
+  --accent-quiet: rgba(13, 85, 102, 0.08);
 }
 
 /* ============================================================================
@@ -238,10 +251,11 @@
    component knowing it is inside one.
 
    The values below are NOT new colours. Each is the exact value the OPPOSITE
-   scheme already declares above — the band is the other scheme, locally. That
-   is what keeps it a distinct band in BOTH schemes: in light it goes dark, and
-   in dark it goes light, so it never collapses into the page it sits in.
-   If a palette value changes above, its twin here must change with it.
+   theme already declares above — the band is the other theme, locally. That is
+   what keeps it a distinct band in BOTH: on the dark default it goes light,
+   and under data-theme='light' it goes dark, so it never collapses into the
+   page it sits in. If a palette value changes above, its twin here must change
+   with it.
 
    --focus-color is redeclared rather than inherited. A custom property is
    substituted where it is DECLARED, so the `--focus-color: var(--accent)` at
@@ -252,6 +266,30 @@
    band; ink 17.05:1, ink-3 4.93:1, accent 7.75:1 on the light band.
    ========================================================================= */
 .section--invert {
+  /* The page default is dark, so the band takes the light palette. */
+  --canvas: #f7f6f3;
+  --canvas-panel: #ffffff;
+  --canvas-sunk: #efeeea;
+  --canvas-invert: #141414;
+
+  --ink: #141414;
+  --ink-2: #414141;
+  --ink-3: #6b6b6b;
+  --ink-invert: #f7f6f3;
+
+  --rule: #dedcd6;
+  --rule-strong: #c2bfb7;
+  --rule-ink: #141414;
+
+  --accent: #0d5566;
+  --accent-hover: #093c48;
+  --accent-quiet: rgba(13, 85, 102, 0.08);
+
+  --focus-color: var(--accent);
+}
+
+/* The reader has opted into light, so the band goes dark to stay a band. */
+:root[data-theme='light'] .section--invert {
   --canvas: #0f0f0f;
   --canvas-panel: #161616;
   --canvas-sunk: #0a0a0a;
@@ -269,31 +307,6 @@
   --accent: #4fb3c7;
   --accent-hover: #7fcedd;
   --accent-quiet: rgba(79, 179, 199, 0.12);
-
-  --focus-color: var(--accent);
-}
-
-@media (prefers-color-scheme: dark) {
-  /* The page is already dark, so the band takes the light palette. */
-  .section--invert {
-    --canvas: #f7f6f3;
-    --canvas-panel: #ffffff;
-    --canvas-sunk: #efeeea;
-    --canvas-invert: #141414;
-
-    --ink: #141414;
-    --ink-2: #414141;
-    --ink-3: #6b6b6b;
-    --ink-invert: #f7f6f3;
-
-    --rule: #dedcd6;
-    --rule-strong: #c2bfb7;
-    --rule-ink: #141414;
-
-    --accent: #0d5566;
-    --accent-hover: #093c48;
-    --accent-quiet: rgba(13, 85, 102, 0.08);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
